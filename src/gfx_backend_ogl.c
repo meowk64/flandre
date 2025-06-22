@@ -1,15 +1,14 @@
 #include "gfx_backend_ogl.h"
-// #include "log.h"
+
 #include <SDL3/SDL.h>
-#include <SDL3/SDL_events.h>
-#include <SDL3/SDL_video.h>
-#include <cglm/struct/io.h>
-#include <cglm/types.h>
+#include <cglm/cglm.h>
+#include <cglm/struct.h>
 #include <lauxlib.h>
 #include <lua.h>
 #include <stddef.h>
 #include <stdio.h>
 #include <uthash.h>
+
 #include "decoder.h"
 #include "log.h"
 #include "math.h"

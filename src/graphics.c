@@ -1,8 +1,9 @@
 #include "graphics.h"
+
 #include <SDL3/SDL_video.h>
-#include <lauxlib.h>
 #include <lua.h>
-#include <luaconf.h>
+#include <lauxlib.h>
+
 #include "gfx_backend_ogl.h"
 #include "gfx_interface.h"
 #include "log.h"

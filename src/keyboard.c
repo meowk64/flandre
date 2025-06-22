@@ -1,10 +1,11 @@
 #include "keyboard.h"
+
 #include <SDL3/SDL_events.h>
 #include <SDL3/SDL_keycode.h>
 #include <uthash.h>
-#include "memory.h"
 #include <lauxlib.h>
 
+#include "memory.h"
 
 struct key_state_entry_t {
     int key;

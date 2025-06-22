@@ -1,9 +1,10 @@
 #include "math.h"
+
 #include <cglm/cglm.h>
-#include <cglm/types-struct.h>
+#include <cglm/struct.h>
 #include <lua.h>
 #include <lauxlib.h>
-#include <cglm/struct.h>
+
 #include "memory.h"
 
 static int l_transform(lua_State * L)

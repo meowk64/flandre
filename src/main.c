@@ -1,5 +1,7 @@
-#include <SDL3/SDL_error.h>
-#include <SDL3/SDL_version.h>
+#define SDL_MAIN_USE_CALLBACKS 1
+#include <SDL3/SDL.h>
+#include <SDL3/SDL_main.h>
+
 #include <lua.h>
 #include <lauxlib.h>
 #include <lualib.h>
@@ -14,10 +16,6 @@
 #include "log.h"
 #include "flandre.h"
 
-#include <cglm/cglm.h>
-#define SDL_MAIN_USE_CALLBACKS 1
-#include <SDL3/SDL.h>
-#include <SDL3/SDL_main.h>
 
 int SDL_AppInit(void **appstate_, int argc, char *argv[])
 {

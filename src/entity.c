@@ -1,10 +1,9 @@
 #include "entity.h"
-#include <SDL3/SDL_stdinc.h>
+
 #include <lauxlib.h>
 #include <lua.h>
-#include <stddef.h>
-#include <stdlib.h>
 #include "log.h"
+
 #include "memory.h"
 
 struct entity_node

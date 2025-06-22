@@ -2,15 +2,13 @@
 
 #include <lauxlib.h>
 #include <lua.h>
-#include <stddef.h>
+
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb/stb_image.h>
 #define STB_TRUETYPE_IMPLEMENTATION
 #include <stb/stb_truetype.h>
 
-#include "memory.h"
-
-
+/*
 // WARN: 内部分配内存
 // TODO: 这个函数不应该调用 luaL_error 打断控制流
 static int read_file(lua_State * L, FILE * fp, size_t * size, void ** data)
@@ -36,6 +34,7 @@ static int read_file(lua_State * L, FILE * fp, size_t * size, void ** data)
     *data = file_data;
     return 0;
 }
+*/
 
 static int l_png(lua_State * L)
 {
@@ -67,7 +66,7 @@ static int l_image_release(lua_State * L)
     struct fln_image_t * image = luaL_checkudata(L, 1, FLN_USERTYPE_IMAGE);
     if (image->data)
     {
-        fln_free(image->data);
+        stbi_image_free(image->data);
         image->data = nullptr;
     }
     return 0;
