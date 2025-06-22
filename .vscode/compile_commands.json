@@ -1,0 +1,56 @@
+[
+{
+  "directory": "/home/meowk/Documents/flandre",
+  "arguments": ["/usr/bin/gcc", "-c", "-m64", "-fvisibility=hidden", "-O3", "-std=c23", "-Ibuild/.gens/flandre/linux/x86_64/release/platform/windows/idl", "-DNDEBUG", "-o", "build/.objs/flandre/linux/x86_64/release/src/decoder.c.o", "src/decoder.c"],
+  "file": "src/decoder.c"
+},
+{
+  "directory": "/home/meowk/Documents/flandre",
+  "arguments": ["/usr/bin/gcc", "-c", "-m64", "-fvisibility=hidden", "-O3", "-std=c23", "-Ibuild/.gens/flandre/linux/x86_64/release/platform/windows/idl", "-DNDEBUG", "-o", "build/.objs/flandre/linux/x86_64/release/src/main.c.o", "src/main.c"],
+  "file": "src/main.c"
+},
+{
+  "directory": "/home/meowk/Documents/flandre",
+  "arguments": ["/usr/bin/gcc", "-c", "-m64", "-fvisibility=hidden", "-O3", "-std=c23", "-Ibuild/.gens/flandre/linux/x86_64/release/platform/windows/idl", "-DNDEBUG", "-o", "build/.objs/flandre/linux/x86_64/release/src/graphics.c.o", "src/graphics.c"],
+  "file": "src/graphics.c"
+},
+{
+  "directory": "/home/meowk/Documents/flandre",
+  "arguments": ["/usr/bin/gcc", "-c", "-m64", "-fvisibility=hidden", "-O3", "-std=c23", "-Ibuild/.gens/flandre/linux/x86_64/release/platform/windows/idl", "-DNDEBUG", "-o", "build/.objs/flandre/linux/x86_64/release/src/entity.c.o", "src/entity.c"],
+  "file": "src/entity.c"
+},
+{
+  "directory": "/home/meowk/Documents/flandre",
+  "arguments": ["/usr/bin/gcc", "-c", "-m64", "-fvisibility=hidden", "-O3", "-std=c23", "-Ibuild/.gens/flandre/linux/x86_64/release/platform/windows/idl", "-DNDEBUG", "-o", "build/.objs/flandre/linux/x86_64/release/src/math.c.o", "src/math.c"],
+  "file": "src/math.c"
+},
+{
+  "directory": "/home/meowk/Documents/flandre",
+  "arguments": ["/usr/bin/gcc", "-c", "-m64", "-fvisibility=hidden", "-O3", "-std=c23", "-Ibuild/.gens/flandre/linux/x86_64/release/platform/windows/idl", "-DNDEBUG", "-o", "build/.objs/flandre/linux/x86_64/release/src/log.c.o", "src/log.c"],
+  "file": "src/log.c"
+},
+{
+  "directory": "/home/meowk/Documents/flandre",
+  "arguments": ["/usr/bin/gcc", "-c", "-m64", "-fvisibility=hidden", "-O3", "-std=c23", "-Ibuild/.gens/flandre/linux/x86_64/release/platform/windows/idl", "-DNDEBUG", "-o", "build/.objs/flandre/linux/x86_64/release/src/keyboard.c.o", "src/keyboard.c"],
+  "file": "src/keyboard.c"
+},
+{
+  "directory": "/home/meowk/Documents/flandre",
+  "arguments": ["/usr/bin/gcc", "-c", "-m64", "-fvisibility=hidden", "-O3", "-std=c23", "-Ibuild/.gens/flandre/linux/x86_64/release/platform/windows/idl", "-DNDEBUG", "-o", "build/.objs/flandre/linux/x86_64/release/src/gfx_backend_ogl.c.o", "src/gfx_backend_ogl.c"],
+  "file": "src/gfx_backend_ogl.c"
+},
+{
+  "directory": "/home/meowk/Documents/flandre",
+  "arguments": ["/usr/bin/gcc", "-c", "-m64", "-fvisibility=hidden", "-O3", "-std=c23", "-Ibuild/.gens/flandre/linux/x86_64/release/platform/windows/idl", "-DNDEBUG", "-o", "build/.objs/flandre/linux/x86_64/release/src/flandre.c.o", "src/flandre.c"],
+  "file": "src/flandre.c"
+},
+{
+  "directory": "/home/meowk/Documents/flandre",
+  "arguments": ["/usr/bin/gcc", "-c", "-m64", "-fvisibility=hidden", "-O3", "-std=c23", "-Ibuild/.gens/flandre/linux/x86_64/release/platform/windows/idl", "-DNDEBUG", "-o", "build/.objs/flandre/linux/x86_64/release/src/memory.c.o", "src/memory.c"],
+  "file": "src/memory.c"
+},
+{
+  "directory": "/home/meowk/Documents/flandre",
+  "arguments": ["/usr/bin/gcc", "-c", "-m64", "-fvisibility=hidden", "-O3", "-std=c23", "-Ibuild/.gens/flandre/linux/x86_64/release/platform/windows/idl", "-DNDEBUG", "-o", "build/.objs/flandre/linux/x86_64/release/src/opengl/glad.c.o", "src/opengl/glad.c"],
+  "file": "src/opengl/glad.c"
+}]
