@@ -2,28 +2,29 @@
 #include <SDL3/SDL.h>
 #include <SDL3/SDL_main.h>
 
-#include <lua.h>
 #include <lauxlib.h>
+#include <lua.h>
 #include <lualib.h>
 
 #include "appstate.h"
 
 #include "entity.h"
+#include "flandre.h"
 #include "graphics.h"
 #include "keyboard.h"
+#include "log.h"
 #include "memory.h"
 #include "opengl/glad.h"
-#include "log.h"
-#include "flandre.h"
 
 
-int SDL_AppInit(void **appstate_, int argc, char *argv[])
+int SDL_AppInit(void ** appstate_, int argc, char * argv[])
 {
     log_info("Flandre game framework | dev-0.1.0");
     log_info("SDL version: %d.%d.%d", SDL_MAJOR_VERSION, SDL_MINOR_VERSION, SDL_MINOR_VERSION);
     log_info("Lua version: %s.%s.%s", LUA_VERSION_MAJOR, LUA_VERSION_MINOR, LUA_VERSION_RELEASE);
     log_info("initalizing basic resource...");
-    if (!SDL_SetAppMetadata("Flandre Game Framework", "0.1.0 dev", "flandre")) {
+    if (!SDL_SetAppMetadata("Flandre Game Framework", "0.1.0 dev", "flandre"))
+    {
         return SDL_APP_FAILURE;
     }
     *appstate_ = fln_allocate(sizeof(struct fln_app_state_t));
@@ -74,13 +75,13 @@ int SDL_AppInit(void **appstate_, int argc, char *argv[])
 int SDL_AppIterate(void * appstate_)
 {
     struct fln_app_state_t * appstate = (struct fln_app_state_t *)appstate_;
-    //uint64_t frame_start = SDL_GetTicks();
-    if(!fln_iterate_entites(appstate->L))
+    // uint64_t frame_start = SDL_GetTicks();
+    if (!fln_iterate_entites(appstate->L))
     {
         return SDL_APP_FAILURE;
     }
     fln_gfx_begin_drawing(appstate);
-    if(!fln_draw_entities(appstate->L))
+    if (!fln_draw_entities(appstate->L))
     {
         return SDL_APP_FAILURE;
     }
@@ -94,7 +95,7 @@ int SDL_AppIterate(void * appstate_)
     return SDL_APP_CONTINUE;
 }
 
-int SDL_AppEvent(void *appstate_, const SDL_Event *event)
+int SDL_AppEvent(void * appstate_, const SDL_Event * event)
 {
     struct fln_app_state_t * appstate = (struct fln_app_state_t *)appstate_;
     if (event->type == SDL_EVENT_QUIT)
@@ -109,7 +110,7 @@ int SDL_AppEvent(void *appstate_, const SDL_Event *event)
     return SDL_APP_CONTINUE;
 }
 
-void SDL_AppQuit(void *appstate_)
+void SDL_AppQuit(void * appstate_)
 {
     struct fln_app_state_t * appstate = (struct fln_app_state_t *)appstate_;
     lua_close(appstate->L);

@@ -2,8 +2,8 @@
 
 #include <cglm/cglm.h>
 #include <cglm/struct.h>
-#include <lua.h>
 #include <lauxlib.h>
+#include <lua.h>
 
 #include "memory.h"
 
@@ -313,7 +313,7 @@ static int l_m_transform_release(lua_State * L)
     return 0;
 }
 
-int fln_luaopen_math(lua_State *L)
+int fln_luaopen_math(lua_State * L)
 {
     const luaL_Reg meths_transform[] = {
         {"set", l_m_transform_set},
@@ -333,8 +333,7 @@ int fln_luaopen_math(lua_State *L)
         {"__mul", l_m_transform_multiply},
         {"release", l_m_transform_release},
         {"__gc", l_m_transform_release},
-        {nullptr, nullptr}
-    };
+        {nullptr, nullptr}};
     luaL_newmetatable(L, FLN_USERTYPE_TRANSFORM);
     lua_pushvalue(L, -1);
     lua_setfield(L, -2, "__index");

@@ -1,8 +1,8 @@
 #include "graphics.h"
 
 #include <SDL3/SDL_video.h>
-#include <lua.h>
 #include <lauxlib.h>
+#include <lua.h>
 
 #include "gfx_backend_ogl.h"
 #include "gfx_interface.h"
@@ -91,19 +91,23 @@ int fln_luaopen_graphics(lua_State * L)
     log_warn("current graphical backend: OpenGL");
     backend = fln_gfx_init_backend_ogl();
     const luaL_Reg funcs[] = {{"pipeline", backend.l_pipeline},
-                              {"mesh", backend.l_mesh},
-                              {"texture2d", backend.l_texture2d},
-                              {nullptr, nullptr}};
+        {"mesh", backend.l_mesh},
+        {"texture2d", backend.l_texture2d},
+        {nullptr, nullptr}};
     const luaL_Reg meths_pipeline[] = {{"uniform", backend.l_pipeline_uniform},
-                                       {"submit", backend.l_pipeline_submit},
-                                       {"release", backend.l_pipeline_release},
-                                       {"texture", backend.l_pipeline_texture},
-                                       {"__gc", backend.l_pipeline_release},
-                                       {nullptr, nullptr}};
+        {"submit", backend.l_pipeline_submit},
+        {"release", backend.l_pipeline_release},
+        {"texture", backend.l_pipeline_texture},
+        {"__gc", backend.l_pipeline_release},
+        {nullptr, nullptr}};
     const luaL_Reg meths_mesh[] = {
-        {"release", backend.l_mesh_release}, {"__gc", backend.l_mesh_release}, {nullptr, nullptr}};
+        {"release", backend.l_mesh_release},
+        {"__gc", backend.l_mesh_release},
+        {nullptr, nullptr}};
     const luaL_Reg meths_texture[] = {
-        {"release", backend.l_texture_release}, {"__gc", backend.l_texture_release}, {nullptr, nullptr}};
+        {"release", backend.l_texture_release},
+        {"__gc", backend.l_texture_release},
+        {nullptr, nullptr}};
 
     luaL_newmetatable(L, FLN_USERTYPE_PIPELINE);
     lua_pushvalue(L, -1);

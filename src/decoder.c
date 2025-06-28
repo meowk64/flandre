@@ -38,14 +38,13 @@ static int read_file(lua_State * L, FILE * fp, size_t * size, void ** data)
 
 static int l_png(lua_State * L)
 {
-    const char * str = luaL_checkstring(L, 1);
+    const char * data = luaL_checkstring(L, 1);
     lua_len(L, 1);
     size_t size = lua_tointeger(L, -1);
 
     int width, height, channels;
-    unsigned char * img_data = stbi_load_from_memory(
-        (const unsigned char *)str, size, &width, &height, &channels, STBI_rgb_alpha);
-        //      ↑ 十分神秘的操作 ↑
+    unsigned char * img_data = stbi_load_from_memory((const unsigned char *)data, size, &width, &height, &channels, STBI_rgb_alpha);
+    //                                                      ↑ 十分神秘的操作 ↑
 
     if (!img_data)
     {
@@ -71,22 +70,11 @@ static int l_image_release(lua_State * L)
     }
     return 0;
 }
-/*
+
 static int l_ttf(lua_State * L)
 {
-    FILE * fp = *(FILE **)luaL_checkudata(L, 1, "FILE*");
-
-    size_t size;
-    unsigned char * data;
-
-    read_file(L, fp, &size, (void *)&data);
-    stbtt_fontinfo info;
-    if (!stbtt_InitFont(&info, data, 0))
-    {
-        fln_free(data);
-        return luaL_error(L, "failed to init ttf font");
-    }
-
+    const char * data = luaL_checkstring(L, 1);
+    struct fln_font_t font;
 
     return 1;
 }
@@ -97,12 +85,14 @@ static int l_ttf_release(lua_State * L)
 
     return 0;
 }
-*/
+
 int fln_luaopen_decoder(lua_State * L)
 {
     stbi_set_flip_vertically_on_load(1);
     const luaL_Reg image_meths[] = {
-        {"release", l_image_release}, {"__gc", l_image_release}, {nullptr, nullptr}};
+        {"release", l_image_release},
+        {"__gc", l_image_release},
+        {nullptr, nullptr}};
     luaL_newmetatable(L, "fln.image");
     lua_pushvalue(L, -1);
     lua_setfield(L, -2, "__index");

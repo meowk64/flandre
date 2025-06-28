@@ -1,5 +1,6 @@
 #include "flandre.h"
 #include <lua.h>
+#include "timer.h"
 #include "decoder.h"
 #include "entity.h"
 #include "graphics.h"
@@ -10,6 +11,10 @@ int fln_luaopen(lua_State * L)
 {
     lua_settop(L, 0);
     lua_newtable(L);
+
+    lua_pushcfunction(L, fln_luaopen_timer);
+    lua_call(L, 0, 1);
+    lua_setfield(L, 1, "timer");
 
     lua_pushcfunction(L, fln_luaopen_decoder);
     lua_call(L, 0, 1);

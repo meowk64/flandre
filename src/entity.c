@@ -82,10 +82,12 @@ static int l_new(lua_State * L)
     int layer = luaL_optinteger(L, 1, 0);
     if (layer > 16)
     {
+        log_warn("attempt to create an entity at layer %d (>16), it has been changed to 16", layer);
         layer = 16;
     }
     else if (layer < 0)
     {
+        log_warn("attempt to create an entity at layer %d (<16), it has been changed to 0", layer);
         layer = 0;
     }
     lua_settop(L, 0);
@@ -162,7 +164,7 @@ static int l_kill(lua_State * L)
 
 static int pri_l_iterate(lua_State * L)
 {
-    for (size_t i = 0; i < ENTITIES_LAYERS_SIZE; i ++)
+    for (size_t i = 0; i < ENTITIES_LAYERS_SIZE; i++)
     {
         if (entities_layers[i].first)
         {
@@ -174,9 +176,9 @@ static int pri_l_iterate(lua_State * L)
 
 static int pri_l_draw(lua_State * L)
 {
-    for (size_t i = 0; i < ENTITIES_LAYERS_SIZE; i ++)
+    for (size_t i = 0; i < ENTITIES_LAYERS_SIZE; i++)
     {
-        if(entities_layers[i].first)
+        if (entities_layers[i].first)
         {
             iterate_layer(L, entities_layers[i], "drw");
         }

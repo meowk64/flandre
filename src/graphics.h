@@ -1,12 +1,12 @@
 #pragma once
 
+#include <SDL3/SDL.h>
 #include <SDL3/SDL_events.h>
 #include <SDL3/SDL_video.h>
 #include <lua.h>
-#include <SDL3/SDL.h>
 
-#include "opengl/glad.h"
 #include "appstate.h"
+#include "opengl/glad.h"
 
 int fln_luaopen_graphics(lua_State * L);
 

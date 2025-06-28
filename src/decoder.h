@@ -1,10 +1,12 @@
 #pragma once
 
-#include <lua.h>
 #include <lauxlib.h>
+#include <lua.h>
 #include <stb/stb_truetype.h>
 
+#define FLN_USERTYPE_ARCHIVE "fln.archive" // TODO
 #define FLN_USERTYPE_IMAGE "fln.image"
+#define FLN_USERTYPE_MODEL "fln.model" // TODO
 #define FLN_USERTYPE_FONT "fln.font"
 
 struct fln_image_t

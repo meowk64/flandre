@@ -421,20 +421,13 @@ static int l_m_pipeline_uniform(lua_State * L)
     {
         glUniform2f(location, luaL_checknumber(L, 3), luaL_checknumber(L, 4));
     }
-    else if (size == 3 && lua_type(L, 3) == LUA_TNUMBER && lua_type(L, 4) == LUA_TNUMBER &&
-             lua_type(L, 5) == LUA_TNUMBER)
+    else if (size == 3 && lua_type(L, 3) == LUA_TNUMBER && lua_type(L, 4) == LUA_TNUMBER && lua_type(L, 5) == LUA_TNUMBER)
     {
-        glUniform3f(
-            location, luaL_checknumber(L, 3), luaL_checknumber(L, 4), luaL_checknumber(L, 5));
+        glUniform3f(location, luaL_checknumber(L, 3), luaL_checknumber(L, 4), luaL_checknumber(L, 5));
     }
-    else if (size == 4 && lua_type(L, 3) == LUA_TNUMBER && lua_type(L, 4) == LUA_TNUMBER &&
-             lua_type(L, 5) == LUA_TNUMBER && lua_type(L, 6) == LUA_TNUMBER)
+    else if (size == 4 && lua_type(L, 3) == LUA_TNUMBER && lua_type(L, 4) == LUA_TNUMBER && lua_type(L, 5) == LUA_TNUMBER && lua_type(L, 6) == LUA_TNUMBER)
     {
-        glUniform4f(location,
-                    luaL_checknumber(L, 3),
-                    luaL_checknumber(L, 4),
-                    luaL_checknumber(L, 5),
-                    luaL_checknumber(L, 6));
+        glUniform4f(location, luaL_checknumber(L, 3), luaL_checknumber(L, 4), luaL_checknumber(L, 5), luaL_checknumber(L, 6));
     }
     else
     {
@@ -511,8 +504,7 @@ static int l_mesh(lua_State * L)
     size_t offset = 0;
     for (size_t i = 0; i < attributes_count; i++)
     {
-        glVertexAttribPointer(
-            i, attributes[i], GL_FLOAT, GL_FALSE, stride, (void *)(uintptr_t)offset);
+        glVertexAttribPointer(i, attributes[i], GL_FLOAT, GL_FALSE, stride, (void *)(uintptr_t)offset);
         glEnableVertexAttribArray(i);
         offset += attributes[i] * sizeof(float);
     }
@@ -573,15 +565,7 @@ static int l_texture2d(lua_State * L)
 
     // 加载纹理数据
     glPixelStorei(GL_UNPACK_ALIGNMENT, 4);   // 确保 4 字节对齐
-    glTexImage2D(GL_TEXTURE_2D,
-                 0,
-                 GL_RGBA,
-                 image->width,
-                 image->height,
-                 0,
-                 GL_RGBA,
-                 GL_UNSIGNED_BYTE,
-                 image->data);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, image->width, image->height, 0, GL_RGBA, GL_UNSIGNED_BYTE, image->data);
 
     glBindTexture(GL_TEXTURE_2D, 0);
 
@@ -669,8 +653,7 @@ static void receive_window_events(struct fln_app_state_t * appstate, const SDL_E
     {
         int w, h;
         SDL_GetWindowSize(appstate->window, &w, &h);
-        glViewport(
-            0,
+        glViewport(0,
             0,
             w,
             h);   // TODO: 不能直接更改 viewport，因为 SDL 的事件接收回调可能会在别的线程被调用
