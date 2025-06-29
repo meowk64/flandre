@@ -97,7 +97,7 @@ int fln_luaopen_graphics(lua_State * L)
     const luaL_Reg meths_pipeline[] = {{"uniform", backend.l_pipeline_uniform},
         {"submit", backend.l_pipeline_submit},
         {"release", backend.l_pipeline_release},
-        {"texture", backend.l_pipeline_texture},
+        //{"texture", backend.l_pipeline_texture},
         {"__gc", backend.l_pipeline_release},
         {nullptr, nullptr}};
     const luaL_Reg meths_mesh[] = {

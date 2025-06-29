@@ -10,6 +10,7 @@
 #include <uthash.h>
 
 #include "decoder.h"
+#include "gfx_interface.h"
 #include "log.h"
 #include "math.h"
 #include "memory.h"
@@ -296,6 +297,7 @@ static int l_pipeline(lua_State * L)
 //         反正多写点也不会怀孕（？
 static GLuint current_shader_program = 0;
 static GLuint current_vao = 0;
+static int texture_unit_count = 0; // 用于记录纹理单元，以支持自动传入多个纹理
 
 static int l_m_pipeline_submit(lua_State * L)
 {
@@ -325,6 +327,8 @@ static int l_m_pipeline_submit(lua_State * L)
 
     glDrawElements(GL_TRIANGLES, mesh->vertices_count, GL_UNSIGNED_INT, nullptr);
 
+    texture_unit_count = 0;
+
     return 0;
 }
 
@@ -351,7 +355,6 @@ static int l_m_pipeline_release(lua_State * L)
     return 0;
 }
 
-// 之后也可能像 LOVE 那样把给着色器发送纹理，二进制数据啥的都整合到这一个方法里面
 static int l_m_pipeline_uniform(lua_State * L)
 {
     struct pipeline_t * pl = luaL_checkudata(L, 1, FLN_USERTYPE_PIPELINE);
@@ -367,25 +370,65 @@ static int l_m_pipeline_uniform(lua_State * L)
         return luaL_error(L, "uniform '%s' not found", name);
     }
 
-    int size = lua_gettop(L) - 2;
-    if (size == 1 && lua_type(L, 3) == LUA_TUSERDATA)
+    int size = lua_gettop(L) - 2; // 除去 self 和 uniform 名称，之后的参数都是要传入 uniform 的
+    if (size == 1 && lua_type(L, 3) == LUA_TUSERDATA && (luaL_getmetafield(L, 3, "__name") != LUA_TNIL))
     {
-        mat4s ** transform = luaL_checkudata(L, 3, FLN_USERTYPE_TRANSFORM);
-        if (transform && *transform)
+        lua_pushstring(L, FLN_USERTYPE_TEXTURE2D);
+        lua_pushstring(L, FLN_USERTYPE_TRANSFORM);
+        if(lua_compare(L, -1, -3, LUA_OPEQ))
         {
-            // glms_mat4_print(*transform, stdout);
-            glUniformMatrix4fv(location, 1, GL_FALSE, (const GLfloat *)*transform);
+            lua_pop(L, 3);
+            mat4s ** transform = lua_touserdata(L, 3); // 已经比较过一遍了
+            if (transform && *transform)
+            {
+                // glms_mat4_print(*transform, stdout);
+                glUniformMatrix4fv(location, 1, GL_FALSE, (const GLfloat *)*transform);
+            }
+            else
+            {
+                return luaL_error(L, "invalid transform");
+            }
+        }
+        else if(lua_compare(L, -2, -2, LUA_OPEQ))
+        {
+            lua_pop(L, 3);
+            if (texture_unit_count > 15)
+            {
+                return luaL_error(L, "the number of texture units has reached the maximum limit (%d)", texture_unit_count);
+            }
+
+            if (pl->shader_program == 0)
+            {
+                return luaL_error(L, "invalid pipeline");
+            }
+
+            if (current_shader_program != pl->shader_program)
+            {
+                glUseProgram(pl->shader_program);
+            }
+            struct texture_t * texture = lua_touserdata(L, 3); // 同上，已经比较过一遍了
+
+            GLuint location = get_uniform_location(pl, name);
+            if (location == -1)
+            {
+                return luaL_error(L, "uniform '%s' not found", name);
+            }
+
+            glActiveTexture(GL_TEXTURE0 + texture_unit_count);
+            glBindTexture(GL_TEXTURE_2D, texture->id);
+            glUniform1i(location, texture_unit_count);
+            texture_unit_count++;
         }
         else
         {
-            return luaL_error(L, "invalid transform");
+            return luaL_error(L, "unsupported uniform arguments (unknown userdata)");
         }
     }
     else if (size == 1 && lua_type(L, 3) == LUA_TNUMBER)
     {
         glUniform1f(location, luaL_checknumber(L, 3));
     }
-    else if (size == 1 && lua_type(L, 3) == LUA_TTABLE)
+    else if (size == 1 && lua_type(L, 3) == LUA_TTABLE) // 挺讨厌这种的说实话
     {
         size_t len = lua_rawlen(L, 3);
         float * values = fln_allocate(len * sizeof(float));
@@ -431,12 +474,11 @@ static int l_m_pipeline_uniform(lua_State * L)
     }
     else
     {
-        return luaL_error(L, "unsupported uniform arguments");
+        return luaL_error(L, "unsupported uniform arguments (unknown size)");
     }
-
     return 0;
 }
-
+/*
 static int l_m_pipeline_texture(lua_State * L)
 {
     struct pipeline_t * pl = luaL_checkudata(L, 1, FLN_USERTYPE_PIPELINE);
@@ -466,7 +508,7 @@ static int l_m_pipeline_texture(lua_State * L)
 
     return 0;
 }
-
+*/
 // 可能只会用在创建四边形三角形上（
 // decoder 能加载模型的说
 static int l_mesh(lua_State * L)
@@ -672,7 +714,7 @@ struct fln_gfx_backend_t fln_gfx_init_backend_ogl()
     backend.l_pipeline = l_pipeline;
     backend.l_pipeline_release = l_m_pipeline_release;
     backend.l_pipeline_uniform = l_m_pipeline_uniform;
-    backend.l_pipeline_texture = l_m_pipeline_texture;
+    //backend.l_pipeline_texture = l_m_pipeline_texture;
     backend.l_pipeline_submit = l_m_pipeline_submit;
     backend.l_mesh = l_mesh;
     backend.l_mesh_release = l_m_mesh_release;
