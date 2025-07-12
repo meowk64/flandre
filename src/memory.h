@@ -1,6 +1,5 @@
 #pragma once
 
-#include <stddef.h>
 #include <stdlib.h>
 
 void * fln_allocate(size_t size);

@@ -44,7 +44,6 @@ static int l_png(lua_State * L)
 
     int width, height, channels;
     unsigned char * img_data = stbi_load_from_memory((const unsigned char *)data, size, &width, &height, &channels, STBI_rgb_alpha);
-    //                                                      ↑ 十分神秘的操作 ↑
 
     if (!img_data)
     {
@@ -58,6 +57,17 @@ static int l_png(lua_State * L)
     image->data = img_data;
 
     return 1;
+}
+
+static int l_image_size(lua_State * L)
+{
+    struct fln_image_t * image = luaL_checkudata(L, 1, FLN_USERTYPE_IMAGE);
+    if (image->data)
+    {
+        lua_pushinteger(L, image->width);
+        lua_pushinteger(L, image->height);
+    }
+    return 2;
 }
 
 static int l_image_release(lua_State * L)
@@ -86,14 +96,16 @@ static int l_ttf_release(lua_State * L)
     return 0;
 }
 
+
 int fln_luaopen_decoder(lua_State * L)
 {
     stbi_set_flip_vertically_on_load(1);
     const luaL_Reg image_meths[] = {
+        {"size", l_image_size},
         {"release", l_image_release},
         {"__gc", l_image_release},
         {nullptr, nullptr}};
-    luaL_newmetatable(L, "fln.image");
+    luaL_newmetatable(L, FLN_USERTYPE_IMAGE);
     lua_pushvalue(L, -1);
     lua_setfield(L, -2, "__index");
     luaL_setfuncs(L, image_meths, 0);

@@ -1,6 +1,5 @@
 #include "math.h"
 
-#include <cglm/cglm.h>
 #include <cglm/struct.h>
 #include <lauxlib.h>
 #include <lua.h>
@@ -271,7 +270,7 @@ static int l_m_transform_viewport(lua_State * L)
         float y = luaL_checknumber(L, 3);
         float width = luaL_checknumber(L, 4);
         float height = luaL_checknumber(L, 5);
-        **transform = glms_ortho(x, x + width, y + height, y, -1.0f, 1.0f);
+        **transform = glms_ortho(x, x + width, y, y + height, -1.f, 1.0f);
     }
     else
     {
@@ -285,10 +284,10 @@ static int l_m_transform_multiply(lua_State * L)
     mat4s ** transform = luaL_checkudata(L, 1, FLN_USERTYPE_TRANSFORM);
     if (transform && *transform)
     {
-        mat4s * other = luaL_checkudata(L, 2, FLN_USERTYPE_TRANSFORM);
-        if (other)
+        mat4s ** other = luaL_checkudata(L, 2, FLN_USERTYPE_TRANSFORM);
+        if (other && *other)
         {
-            **transform = glms_mat4_mul(**transform, *other);
+            **transform = glms_mat4_mul(**transform, **other);
         }
         else
         {

@@ -26,8 +26,6 @@ _Sorry, this page does not currently have an English version._
 
 `log.c` https://github.com/rxi/log.c
 
-`microtar`（暂时还没有用到）https://github.com/rxi/microtar
-
 ## 构建
 
 ```shell

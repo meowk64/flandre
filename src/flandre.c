@@ -1,5 +1,6 @@
 #include "flandre.h"
 #include <lua.h>
+#include "mouse.h"
 #include "timer.h"
 #include "decoder.h"
 #include "entity.h"
@@ -35,6 +36,10 @@ int fln_luaopen(lua_State * L)
     lua_pushcfunction(L, fln_luaopen_keyboard);
     lua_call(L, 0, 1);
     lua_setfield(L, 1, "keyboard");
+
+    lua_pushcfunction(L, fln_luaopen_mouse);
+    lua_call(L, 0, 1);
+    lua_setfield(L, 1, "mouse");
 
     lua_settop(L, 1);
     return 1;

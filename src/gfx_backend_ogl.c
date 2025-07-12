@@ -1,12 +1,9 @@
 #include "gfx_backend_ogl.h"
 
 #include <SDL3/SDL.h>
-#include <cglm/cglm.h>
 #include <cglm/struct.h>
 #include <lauxlib.h>
 #include <lua.h>
-#include <stddef.h>
-#include <stdio.h>
 #include <uthash.h>
 
 #include "decoder.h"
@@ -115,7 +112,7 @@ static int compile_shader(lua_State * L, GLuint shader, const char * src)
     return 1;
 }
 
-// 从文件或字符串中获取着色器源代码
+// 从字符串中获取着色器源代码
 static void get_shader_src(lua_State * L, int table_idx, const char * name, char const ** target)
 {
     lua_getfield(L, table_idx, name);
@@ -276,7 +273,7 @@ static int l_pipeline(lua_State * L)
         if (log)
         {
             lua_pushstring(L, log);
-            fln_free(log);   // lua will copy the string, so we can free it.
+            fln_free(log);
             glDeleteShader(vsh);
             glDeleteShader(fsh);
             glDeleteProgram(program);
@@ -371,7 +368,7 @@ static int l_m_pipeline_uniform(lua_State * L)
     }
 
     int size = lua_gettop(L) - 2; // 除去 self 和 uniform 名称，之后的参数都是要传入 uniform 的
-    if (size == 1 && lua_type(L, 3) == LUA_TUSERDATA && (luaL_getmetafield(L, 3, "__name") != LUA_TNIL))
+    if (size == 1 && lua_type(L, 3) == LUA_TUSERDATA && luaL_getmetafield(L, 3, "__name") != LUA_TNIL)
     {
         lua_pushstring(L, FLN_USERTYPE_TEXTURE2D);
         lua_pushstring(L, FLN_USERTYPE_TRANSFORM);
