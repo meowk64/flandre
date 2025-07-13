@@ -616,7 +616,7 @@ static int l_texture2d(lua_State * L)
     return 1;
 }
 
-static int l_texture_release(lua_State * L)
+static int l_texture2d_release(lua_State * L)
 {
     struct texture_t * texture = luaL_checkudata(L, 1, FLN_USERTYPE_TEXTURE2D);
     if (texture->id)
@@ -715,6 +715,6 @@ struct fln_gfx_backend_t fln_gfx_init_backend_ogl()
     backend.l_mesh = l_mesh;
     backend.l_mesh_release = l_m_mesh_release;
     backend.l_texture2d = l_texture2d;
-    backend.l_texture_release = l_texture_release;
+    backend.l_texture2d_release = l_texture2d_release;
     return backend;
 }

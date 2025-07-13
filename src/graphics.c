@@ -105,8 +105,8 @@ int fln_luaopen_graphics(lua_State * L)
         {"__gc", backend.l_mesh_release},
         {nullptr, nullptr}};
     const luaL_Reg meths_texture[] = {
-        {"release", backend.l_texture_release},
-        {"__gc", backend.l_texture_release},
+        {"release", backend.l_texture2d_release},
+        {"__gc", backend.l_texture2d_release},
         {nullptr, nullptr}};
 
     luaL_newmetatable(L, FLN_USERTYPE_PIPELINE);

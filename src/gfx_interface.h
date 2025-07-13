@@ -26,5 +26,5 @@ struct fln_gfx_backend_t
     lua_CFunction l_mesh;
     lua_CFunction l_mesh_release;
     lua_CFunction l_texture2d;
-    lua_CFunction l_texture_release;
+    lua_CFunction l_texture2d_release;
 };
