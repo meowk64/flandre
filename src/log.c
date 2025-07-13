@@ -20,7 +20,7 @@
  * IN THE SOFTWARE.
  */
 /*
-    Edit by meowk64
+    Editing by meowk64
 */
 
 #include "log.h"
