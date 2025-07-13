@@ -1,3 +1,4 @@
+#include "mouse.h"
 #define SDL_MAIN_USE_CALLBACKS 1
 #include <SDL3/SDL.h>
 #include <SDL3/SDL_main.h>
@@ -15,6 +16,7 @@
 #include "log.h"
 #include "memory.h"
 #include "opengl/glad.h"
+#include "system.h"
 
 
 int SDL_AppInit(void ** appstate_, int argc, char * argv[])
@@ -27,7 +29,7 @@ int SDL_AppInit(void ** appstate_, int argc, char * argv[])
     {
         return SDL_APP_FAILURE;
     }
-    *appstate_ = fln_allocate(sizeof(struct fln_app_state_t));
+    *appstate_ = fln_alloc(sizeof(struct fln_app_state_t));
     struct fln_app_state_t * appstate = (struct fln_app_state_t *)*appstate_;
     if (!appstate)
     {
@@ -44,7 +46,7 @@ int SDL_AppInit(void ** appstate_, int argc, char * argv[])
     luaL_openlibs(appstate->L);
     luaL_requiref(appstate->L, "flandre", fln_luaopen, true);
 
-    log_info("initializing SDL subsystem (video & events)...");
+    log_info("initializing SDL subsystem (SDL_INIT_VIDEO | SDL_INIT_EVENTS)...");
     if (!SDL_InitSubSystem(SDL_INIT_VIDEO | SDL_INIT_EVENTS))
     {
         log_error("failed to call SDL_InitSubSystem()");
@@ -57,6 +59,7 @@ int SDL_AppInit(void ** appstate_, int argc, char * argv[])
         log_error("failed to call SDL_CreateWindow()");
         return SDL_APP_FAILURE;
     }
+    fln_set_window_for_system_module(appstate->window);
     log_info("initializing graphics device...");
     if (!fln_gfx_init_resource(appstate))
     {
@@ -75,6 +78,10 @@ int SDL_AppInit(void ** appstate_, int argc, char * argv[])
 int SDL_AppIterate(void * appstate_)
 {
     struct fln_app_state_t * appstate = (struct fln_app_state_t *)appstate_;
+    if (fln_should_terminte())
+    {
+        return SDL_APP_SUCCESS;
+    }
     // uint64_t frame_start = SDL_GetTicks();
     if (!fln_iterate_entites(appstate->L))
     {
@@ -105,6 +112,7 @@ int SDL_AppEvent(void * appstate_, const SDL_Event * event)
     else
     {
         fln_receive_keyboard_events(event);
+        fln_receive_mouse_events(event);
         fln_gfx_receive_window_events(appstate, event);
     }
     return SDL_APP_CONTINUE;

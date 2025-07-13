@@ -1,7 +1,10 @@
 #include "mouse.h"
+#include <SDL3/SDL_events.h>
 #include <lauxlib.h>
 #include <SDL3/SDL_mouse.h>
 #include <lua.h>
+
+static float mouse_wheel_status = 0; // 
 
 static int l_position(lua_State * L)
 {
@@ -21,8 +24,23 @@ static int l_button(lua_State * L)
     return 3;
 }
 
+static int l_wheel(lua_State * L)
+{
+    bool reset = lua_toboolean(L, 1);
+    lua_pushnumber(L, mouse_wheel_status);
+    if(reset)
+    {
+        mouse_wheel_status = 0;
+    }
+    return 1;
+}
+
 void fln_receive_mouse_events(const SDL_Event * event)
 {
+    if (event->type == SDL_EVENT_MOUSE_WHEEL)
+    {
+        mouse_wheel_status += event->wheel.y;
+    }
 }
 
 int fln_luaopen_mouse(lua_State * L)
@@ -30,6 +48,7 @@ int fln_luaopen_mouse(lua_State * L)
     const luaL_Reg funcs[] = {
         {"position", l_position},
         {"button", l_button},
+        {"wheel", l_wheel},
         {nullptr, nullptr},
     };
     luaL_newlib(L, funcs);

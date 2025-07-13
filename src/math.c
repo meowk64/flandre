@@ -10,7 +10,7 @@ static int l_transform(lua_State * L)
 {
     bool identity = lua_toboolean(L, 1);
     mat4s ** transform = lua_newuserdata(L, sizeof(mat4s *));
-    *transform = fln_allocate(sizeof(mat4s));
+    *transform = fln_alloc(sizeof(mat4s));
     luaL_setmetatable(L, FLN_USERTYPE_TRANSFORM);
 
     if (identity)
@@ -60,7 +60,7 @@ static int l_m_transform_set(lua_State * L)
     return 0;
 }
 
-static int l_m_transform_single(lua_State * L)
+static int l_m_transform_value(lua_State * L)
 {
     mat4s ** transform = luaL_checkudata(L, 1, FLN_USERTYPE_TRANSFORM);
     if (transform && *transform)
@@ -316,7 +316,7 @@ int fln_luaopen_math(lua_State * L)
 {
     const luaL_Reg meths_transform[] = {
         {"set", l_m_transform_set},
-        {"single", l_m_transform_single},
+        {"value", l_m_transform_value},
         {"translate", l_m_transform_translate},
         {"rotate", l_m_transform_rotate},
         {"rotate_at", l_m_transform_rotate_at},

@@ -7,11 +7,16 @@
 #include "graphics.h"
 #include "keyboard.h"
 #include "math.h"
+#include "system.h"
 
 int fln_luaopen(lua_State * L)
 {
     lua_settop(L, 0);
     lua_newtable(L);
+
+    lua_pushcfunction(L, fln_luaopen_system);
+    lua_call(L, 0, 1);
+    lua_setfield(L, 1, "system");
 
     lua_pushcfunction(L, fln_luaopen_timer);
     lua_call(L, 0, 1);

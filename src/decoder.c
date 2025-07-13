@@ -2,6 +2,7 @@
 
 #include <lauxlib.h>
 #include <lua.h>
+#include "memory.h"
 
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb/stb_image.h>
@@ -21,7 +22,7 @@ static int read_file(lua_State * L, FILE * fp, size_t * size, void ** data)
     long file_size = ftell(fp);
     fseek(fp, 0, SEEK_SET);
 
-    void * file_data = fln_allocate(file_size);
+    void * file_data = fln_alloc(file_size);
     if (!file_data)
     {
         return luaL_error(L, "failed to allocate memory for file data");
@@ -84,7 +85,15 @@ static int l_image_release(lua_State * L)
 static int l_ttf(lua_State * L)
 {
     const char * data = luaL_checkstring(L, 1);
-    struct fln_font_t font;
+    lua_len(L, 1);
+    size_t len = lua_tointeger(L, 1);
+    lua_pop(L, 1);
+    struct fln_font_t * font = lua_newuserdata(L, sizeof(struct fln_font_t));
+    font->raw_data = (unsigned char *)fln_calloc(len, sizeof(char));
+    if (!stbtt_InitFont(&font->info, font->raw_data, 0))
+    {
+        return luaL_error(L, "failed to call stbtt_InitFont");
+    }
 
     return 1;
 }
@@ -92,7 +101,11 @@ static int l_ttf(lua_State * L)
 static int l_ttf_release(lua_State * L)
 {
     struct fln_font_t * font = luaL_checkudata(L, 1, FLN_USERTYPE_FONT);
-
+    if (font->raw_data)
+    {
+        fln_free(font->raw_data);
+        font->raw_data = nullptr;
+    }
     return 0;
 }
 

@@ -2,12 +2,12 @@
 
 #include <stdlib.h>
 
-void * fln_allocate(size_t size)
+void * fln_alloc(size_t size)
 {
     return malloc(size);
 }
 
-void * fln_allocate_aligned(size_t size, size_t alignment)
+void * fln_alloc_aligned(size_t size, size_t alignment)
 {
     return aligned_alloc(alignment, size);
 }

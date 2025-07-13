@@ -30,7 +30,7 @@ static struct entities_layer entities_layers[ENTITIES_LAYERS_SIZE] = {0};
 
 static struct entity_node * create_entity_node(int ref)
 {
-    struct entity_node * new_node = (struct entity_node *)fln_allocate(sizeof(entity_node));
+    struct entity_node * new_node = (struct entity_node *)fln_alloc(sizeof(entity_node));
     if (new_node == nullptr)
     {
         log_error("failed to allocate memory for new entity node");

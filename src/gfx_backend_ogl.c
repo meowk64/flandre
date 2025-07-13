@@ -55,7 +55,7 @@ static char * get_shader_log(GLuint sh)
     glGetShaderiv(sh, GL_INFO_LOG_LENGTH, &len);
     if (len > 0)
     {
-        char * log = fln_allocate(len);
+        char * log = fln_alloc(len);
         glGetShaderInfoLog(sh, len, &len_written, log);
         return log;
     }
@@ -78,7 +78,7 @@ static char * get_program_log(GLuint prog)
     glGetProgramiv(prog, GL_INFO_LOG_LENGTH, &len);
     if (len > 0)
     {
-        char * log = fln_allocate(len);
+        char * log = fln_alloc(len);
         glGetProgramInfoLog(prog, len, &len_written, log);
         return log;
     }
@@ -129,7 +129,7 @@ static void get_shader_src(lua_State * L, int table_idx, const char * name, char
             size_t size = ftell(src);
             fseek(src, 0, SEEK_SET);
 
-            char * str = fln_allocate(size);
+            char * str = fln_alloc(size);
             if (fread((void *)str, 1, size, src) != size)
             {
                 fln_free(str);
@@ -176,7 +176,7 @@ static GLuint get_uniform_location(struct pipeline_t * pl, const char * name)
     GLuint location = glGetUniformLocation(pl->shader_program, name);
     if (location != -1)
     {
-        entry = (struct uniform_cache_entry_t *)fln_allocate(sizeof(struct uniform_cache_entry_t));
+        entry = (struct uniform_cache_entry_t *)fln_alloc(sizeof(struct uniform_cache_entry_t));
         if (!entry)
         {
             log_error("failed to allocate memory for uniform cache entry");
@@ -368,14 +368,14 @@ static int l_m_pipeline_uniform(lua_State * L)
     }
 
     int size = lua_gettop(L) - 2; // 除去 self 和 uniform 名称，之后的参数都是要传入 uniform 的
-    if (size == 1 && lua_type(L, 3) == LUA_TUSERDATA && luaL_getmetafield(L, 3, "__name") != LUA_TNIL)
+    if (size == 1 && lua_type(L, 3) == LUA_TUSERDATA)
     {
-        lua_pushstring(L, FLN_USERTYPE_TEXTURE2D);
-        lua_pushstring(L, FLN_USERTYPE_TRANSFORM);
-        if(lua_compare(L, -1, -3, LUA_OPEQ))
+        void * texture2d_test = luaL_testudata(L, 3, FLN_USERTYPE_TEXTURE2D);
+        void * transform_test = luaL_testudata(L, 3, FLN_USERTYPE_TRANSFORM);
+        if(transform_test)
         {
-            lua_pop(L, 3);
-            mat4s ** transform = lua_touserdata(L, 3); // 已经比较过一遍了
+            mat4s ** transform = (mat4s **)transform_test;
+            
             if (transform && *transform)
             {
                 // glms_mat4_print(*transform, stdout);
@@ -386,9 +386,8 @@ static int l_m_pipeline_uniform(lua_State * L)
                 return luaL_error(L, "invalid transform");
             }
         }
-        else if(lua_compare(L, -2, -2, LUA_OPEQ))
+        else if(texture2d_test)
         {
-            lua_pop(L, 3);
             if (texture_unit_count > 15)
             {
                 return luaL_error(L, "the number of texture units has reached the maximum limit (%d)", texture_unit_count);
@@ -403,7 +402,7 @@ static int l_m_pipeline_uniform(lua_State * L)
             {
                 glUseProgram(pl->shader_program);
             }
-            struct texture_t * texture = lua_touserdata(L, 3); // 同上，已经比较过一遍了
+            struct texture_t * texture = (struct texture_t *)texture2d_test;
 
             GLuint location = get_uniform_location(pl, name);
             if (location == -1)
@@ -428,7 +427,7 @@ static int l_m_pipeline_uniform(lua_State * L)
     else if (size == 1 && lua_type(L, 3) == LUA_TTABLE) // 挺讨厌这种的说实话
     {
         size_t len = lua_rawlen(L, 3);
-        float * values = fln_allocate(len * sizeof(float));
+        float * values = fln_alloc(len * sizeof(float));
         table_to_array_float(L, 3, values, len);
         if (len == 2)
         {

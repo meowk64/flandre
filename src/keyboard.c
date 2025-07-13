@@ -42,7 +42,7 @@ void fln_receive_keyboard_events(const SDL_Event * event)
         }
         else
         {
-            entry = fln_allocate(sizeof(struct key_state_entry_t));
+            entry = fln_alloc(sizeof(struct key_state_entry_t));
             if (entry)
             {
                 entry->key = key;
