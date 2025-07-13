@@ -3,6 +3,7 @@
 #include <lauxlib.h>
 #include <lua.h>
 #include "log.h"
+#include "error.h"
 
 #include "memory.h"
 
@@ -70,7 +71,7 @@ static void iterate_layer(lua_State * L, struct entities_layer layer, const char
             int code = lua_pcall(L, 1, 0, 0);
             if (code != LUA_OK)
             {
-                log_error("(%s|error code: %d) lua: %s", func_name, code, lua_tostring(L, -1));
+                log_error("(in runtime) (%s|error code: %d) %s", func_name, code, lua_tostring(L, -1));
             }
         }
         lua_settop(L, 2);
@@ -98,7 +99,7 @@ static int l_new(lua_State * L)
     struct entity_node * new_node = create_entity_node(ref);
     if (new_node == nullptr)
     {
-        return luaL_error(L, "failed to create new entity node");
+        return fln_error(L, "failed to create new entity node");
     }
 
     if (entities_layers[layer].first == nullptr)

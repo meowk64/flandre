@@ -3,6 +3,7 @@
 #include <lauxlib.h>
 #include <lua.h>
 #include "memory.h"
+#include "error.h"
 
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb/stb_image.h>
@@ -11,12 +12,12 @@
 
 /*
 // WARN: 内部分配内存
-// TODO: 这个函数不应该调用 luaL_error 打断控制流
+// TODO: 这个函数不应该调用 fln_error 打断控制流
 static int read_file(lua_State * L, FILE * fp, size_t * size, void ** data)
 {
     if (!fp)
     {
-        return luaL_error(L, "invalid FILE* object");
+        return fln_error(L, "invalid FILE* object");
     }
     fseek(fp, 0, SEEK_END);
     long file_size = ftell(fp);
@@ -25,12 +26,12 @@ static int read_file(lua_State * L, FILE * fp, size_t * size, void ** data)
     void * file_data = fln_alloc(file_size);
     if (!file_data)
     {
-        return luaL_error(L, "failed to allocate memory for file data");
+        return fln_error(L, "failed to allocate memory for file data");
     }
     if (fread(file_data, 1, file_size, fp) != file_size)
     {
         fln_free(file_data);
-        return luaL_error(L, "failed to read file data");
+        return fln_error(L, "failed to read file data");
     }
     *data = file_data;
     return 0;
@@ -48,7 +49,7 @@ static int l_png(lua_State * L)
 
     if (!img_data)
     {
-        return luaL_error(L, "failed to load PNG image: %s", stbi_failure_reason());
+        return fln_error(L, "failed to load PNG image: %s", stbi_failure_reason());
     }
     struct fln_image_t * image = lua_newuserdata(L, sizeof(struct fln_image_t));
     luaL_setmetatable(L, FLN_USERTYPE_IMAGE);
@@ -92,7 +93,7 @@ static int l_ttf(lua_State * L)
     font->raw_data = (unsigned char *)fln_calloc(len, sizeof(char));
     if (!stbtt_InitFont(&font->info, font->raw_data, 0))
     {
-        return luaL_error(L, "failed to call stbtt_InitFont");
+        return fln_error(L, "failed to call stbtt_InitFont");
     }
 
     return 1;

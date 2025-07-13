@@ -5,6 +5,7 @@
 #include <lua.h>
 
 #include "memory.h"
+#include "error.h"
 
 static int l_transform(lua_State * L)
 {
@@ -34,7 +35,7 @@ static int l_m_transform_set(lua_State * L)
         size_t len = lua_rawlen(L, 2);
         if (len != sizeof(mat4))
         {
-            return luaL_error(L, "invalid matrix size");
+            return fln_error(L, "invalid matrix size");
         }
         (*transform)->m00 = values[0];
         (*transform)->m01 = values[1];
@@ -55,7 +56,7 @@ static int l_m_transform_set(lua_State * L)
     }
     else
     {
-        return luaL_error(L, "invalid transform");
+        return fln_error(L, "invalid transform");
     }
     return 0;
 }
@@ -70,13 +71,13 @@ static int l_m_transform_value(lua_State * L)
         double value = luaL_checknumber(L, 4);
         if (ix < 1 || ix > 4 || iy < 1 || iy > 4)
         {
-            return luaL_error(L, "invalid matrix index");
+            return fln_error(L, "invalid matrix index");
         }
         (*transform)->raw[ix - 1][iy - 1] = (float)value;
     }
     else
     {
-        return luaL_error(L, "invalid transform");
+        return fln_error(L, "invalid transform");
     }
     return 0;
 }
@@ -93,7 +94,7 @@ static int l_m_transform_translate(lua_State * L)
     }
     else
     {
-        return luaL_error(L, "invalid transform");
+        return fln_error(L, "invalid transform");
     }
     return 0;
 }
@@ -111,7 +112,7 @@ static int l_m_transform_rotate(lua_State * L)
     }
     else
     {
-        return luaL_error(L, "invalid transform");
+        return fln_error(L, "invalid transform");
     }
     return 0;
 }
@@ -132,7 +133,7 @@ static int l_m_transform_rotate_at(lua_State * L)
     }
     else
     {
-        return luaL_error(L, "invalid transform");
+        return fln_error(L, "invalid transform");
     }
     return 0;
 }
@@ -150,7 +151,7 @@ static int l_m_transform_spin(lua_State * L)
     }
     else
     {
-        return luaL_error(L, "invalid transform");
+        return fln_error(L, "invalid transform");
     }
     return 0;
 }
@@ -167,7 +168,7 @@ static int l_m_transform_scale(lua_State * L)
     }
     else
     {
-        return luaL_error(L, "invalid transform");
+        return fln_error(L, "invalid transform");
     }
     return 0;
 }
@@ -181,7 +182,7 @@ static int l_m_transform_identity(lua_State * L)
     }
     else
     {
-        return luaL_error(L, "invalid transform");
+        return fln_error(L, "invalid transform");
     }
     return 0;
 }
@@ -195,7 +196,7 @@ static int l_m_transform_zero(lua_State * L)
     }
     else
     {
-        return luaL_error(L, "invalid transform");
+        return fln_error(L, "invalid transform");
     }
     return 0;
 }
@@ -215,7 +216,7 @@ static int l_m_transform_ortho(lua_State * L)
     }
     else
     {
-        return luaL_error(L, "invalid transform");
+        return fln_error(L, "invalid transform");
     }
     return 0;
 }
@@ -233,7 +234,7 @@ static int l_m_transform_perspective(lua_State * L)
     }
     else
     {
-        return luaL_error(L, "invalid transform");
+        return fln_error(L, "invalid transform");
     }
     return 0;
 }
@@ -256,7 +257,7 @@ static int l_m_transform_lookat(lua_State * L)
     }
     else
     {
-        return luaL_error(L, "invalid transform");
+        return fln_error(L, "invalid transform");
     }
     return 0;
 }
@@ -274,7 +275,7 @@ static int l_m_transform_viewport(lua_State * L)
     }
     else
     {
-        return luaL_error(L, "invalid transform");
+        return fln_error(L, "invalid transform");
     }
     return 0;
 }
@@ -291,12 +292,12 @@ static int l_m_transform_multiply(lua_State * L)
         }
         else
         {
-            return luaL_error(L, "invalid transform (former)");
+            return fln_error(L, "invalid transform (former)");
         }
     }
     else
     {
-        return luaL_error(L, "invalid transform (latter)");
+        return fln_error(L, "invalid transform (latter)");
     }
     return 0;
 }

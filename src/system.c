@@ -4,6 +4,7 @@
 #include <lauxlib.h>
 #include <lua.h>
 #include "log.h"
+#include "error.h"
 
 static const char * const window_options[] = {
     "size",
@@ -45,7 +46,7 @@ static int l_window(lua_State * L)
         }
         default:
         {
-            return luaL_error(L, "it's impossible...");
+            return fln_error(L, "it's impossible...");
         }
         }
     }
@@ -74,11 +75,11 @@ static int l_window(lua_State * L)
         }
         default:
         {
-            return luaL_error(L, "it's impossible...");
+            return fln_error(L, "it's impossible...");
         }
         }
     }
-    return luaL_error(L, "invaild argument number (%d)", top);
+    return fln_error(L, "invaild argument number (%d)", top);
 }
 
 static int l_terminate(lua_State * L)
@@ -91,7 +92,7 @@ static int l_terminate(lua_State * L)
     }
     else
     {
-        return luaL_error(L, "attempt to terminate the program twice");
+        return fln_error(L, "attempt to terminate the program twice");
     }
     return 0;
 }

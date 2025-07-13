@@ -6,6 +6,7 @@
 #include <lua.h>
 #include <uthash.h>
 
+#include "error.h"
 #include "decoder.h"
 #include "gfx_interface.h"
 #include "log.h"
@@ -133,7 +134,7 @@ static void get_shader_src(lua_State * L, int table_idx, const char * name, char
             if (fread((void *)str, 1, size, src) != size)
             {
                 fln_free(str);
-                luaL_error(L, "failed to read shader file `%s`", name);
+                fln_error(L, "failed to read shader file `%s`", name);
             }
             lua_pop(L, 1); // pop 掉原本的 FILE*
             lua_pushlstring(L, str, size);
@@ -143,7 +144,7 @@ static void get_shader_src(lua_State * L, int table_idx, const char * name, char
     */
     else
     {
-        luaL_error(L, "`%s` not found, or invalid type", name);
+        fln_error(L, "`%s` not found, or invalid type", name);
     }
 }
 
@@ -156,7 +157,7 @@ static void table_to_array_float(lua_State * L, int index, float arr[], int size
         lua_rawgeti(L, index, i + 1);
         if (!lua_isnumber(L, -1))
         {
-            luaL_error(L, "invalid type in table at index %d", i + 1);
+            fln_error(L, "invalid type in table at index %d", i + 1);
         }
         arr[i] = lua_tonumber(L, -1);
         lua_pop(L, 1);
@@ -236,7 +237,7 @@ static int l_pipeline(lua_State * L)
     lua_getfield(L, 1, "shaders");
     if (lua_type(L, -1) != LUA_TTABLE)
     {
-        return luaL_error(L, "`shaders` not found, or invalid type");
+        return fln_error(L, "`shaders` not found, or invalid type");
     }
 
     // vertex
@@ -301,7 +302,7 @@ static int l_m_pipeline_submit(lua_State * L)
     struct pipeline_t * pl = luaL_checkudata(L, 1, FLN_USERTYPE_PIPELINE);
     if (pl->shader_program == 0)
     {
-        return luaL_error(L, "invalid pipeline");
+        return fln_error(L, "invalid pipeline");
     }
 
     if (current_shader_program != pl->shader_program)
@@ -313,7 +314,7 @@ static int l_m_pipeline_submit(lua_State * L)
     struct mesh_t * mesh = luaL_checkudata(L, 2, FLN_USERTYPE_MESH);
     if (mesh->vertices_count == 0 || mesh->ebo == 0 || mesh->vao == 0 || mesh->vbo == 0)
     {
-        return luaL_error(L, "invalid mesh");
+        return fln_error(L, "invalid mesh");
     }
 
     if (mesh->vao != current_vao)
@@ -357,14 +358,14 @@ static int l_m_pipeline_uniform(lua_State * L)
     struct pipeline_t * pl = luaL_checkudata(L, 1, FLN_USERTYPE_PIPELINE);
     if (pl->shader_program == 0)
     {
-        return luaL_error(L, "invalid pipeline");
+        return fln_error(L, "invalid pipeline");
     }
     glUseProgram(pl->shader_program);
     const char * name = luaL_checkstring(L, 2);
     GLuint location = get_uniform_location(pl, name);
     if (location == -1)
     {
-        return luaL_error(L, "uniform '%s' not found", name);
+        return fln_error(L, "uniform '%s' not found", name);
     }
 
     int size = lua_gettop(L) - 2; // 除去 self 和 uniform 名称，之后的参数都是要传入 uniform 的
@@ -383,19 +384,19 @@ static int l_m_pipeline_uniform(lua_State * L)
             }
             else
             {
-                return luaL_error(L, "invalid transform");
+                return fln_error(L, "invalid transform");
             }
         }
         else if(texture2d_test)
         {
             if (texture_unit_count > 15)
             {
-                return luaL_error(L, "the number of texture units has reached the maximum limit (%d)", texture_unit_count);
+                return fln_error(L, "the number of texture units has reached the maximum limit (%d)", texture_unit_count);
             }
 
             if (pl->shader_program == 0)
             {
-                return luaL_error(L, "invalid pipeline");
+                return fln_error(L, "invalid pipeline");
             }
 
             if (current_shader_program != pl->shader_program)
@@ -407,7 +408,7 @@ static int l_m_pipeline_uniform(lua_State * L)
             GLuint location = get_uniform_location(pl, name);
             if (location == -1)
             {
-                return luaL_error(L, "uniform '%s' not found", name);
+                return fln_error(L, "uniform '%s' not found", name);
             }
 
             glActiveTexture(GL_TEXTURE0 + texture_unit_count);
@@ -417,7 +418,7 @@ static int l_m_pipeline_uniform(lua_State * L)
         }
         else
         {
-            return luaL_error(L, "unsupported uniform arguments (unknown userdata)");
+            return fln_error(L, "unsupported uniform arguments (unknown userdata)");
         }
     }
     else if (size == 1 && lua_type(L, 3) == LUA_TNUMBER)
@@ -452,7 +453,7 @@ static int l_m_pipeline_uniform(lua_State * L)
         else
         {
             fln_free(values);
-            return luaL_error(L, "unsupported uniform table size: %d", (int)len);
+            return fln_error(L, "unsupported uniform table size: %d", (int)len);
         }
         fln_free(values);
     }
@@ -470,7 +471,7 @@ static int l_m_pipeline_uniform(lua_State * L)
     }
     else
     {
-        return luaL_error(L, "unsupported uniform arguments (unknown size)");
+        return fln_error(L, "unsupported uniform arguments (unknown size)");
     }
     return 0;
 }
@@ -480,7 +481,7 @@ static int l_m_pipeline_texture(lua_State * L)
     struct pipeline_t * pl = luaL_checkudata(L, 1, FLN_USERTYPE_PIPELINE);
     if (pl->shader_program == 0)
     {
-        return luaL_error(L, "invalid pipeline");
+        return fln_error(L, "invalid pipeline");
     }
     glUseProgram(pl->shader_program);
     const char * uniform_name = luaL_checkstring(L, 2);
@@ -489,13 +490,13 @@ static int l_m_pipeline_texture(lua_State * L)
 
     if (texture_unit < 0 || texture_unit >= GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS)
     {
-        return luaL_error(L, "invalid texture unit: %d", texture_unit);
+        return fln_error(L, "invalid texture unit: %d", texture_unit);
     }
 
     GLuint location = get_uniform_location(pl, uniform_name);
     if (location == -1)
     {
-        return luaL_error(L, "uniform '%s' not found", uniform_name);
+        return fln_error(L, "uniform '%s' not found", uniform_name);
     }
 
     glActiveTexture(GL_TEXTURE0 + texture_unit);
@@ -579,15 +580,15 @@ static int l_texture2d(lua_State * L)
     struct fln_image_t * image = luaL_checkudata(L, 1, FLN_USERTYPE_IMAGE);
     if (!image->data)
     {
-        return luaL_error(L, "invalid image data");
+        return fln_error(L, "invalid image data");
     }
     if (image->channels != 4)
     {
-        return luaL_error(L, "invalid image channels: %d", image->channels);
+        return fln_error(L, "invalid image channels: %d", image->channels);
     }
     if (image->width <= 0 || image->height <= 0)
     {
-        return luaL_error(L, "invalid image size: %dx%d", image->width, image->height);
+        return fln_error(L, "invalid image size: %dx%d", image->width, image->height);
     }
 
     GLuint texture;

@@ -18,7 +18,6 @@
 #include "opengl/glad.h"
 #include "system.h"
 
-
 int SDL_AppInit(void ** appstate_, int argc, char * argv[])
 {
     log_info("Flandre game framework | dev-0.1.0");
@@ -69,7 +68,7 @@ int SDL_AppInit(void ** appstate_, int argc, char * argv[])
     log_info("loading program entry...");
     if (luaL_dofile(appstate->L, "main.lua"))
     {
-        log_error("%s", lua_tostring(appstate->L, -1));
+        log_error("(in entry) %s", lua_tostring(appstate->L, -1));
     }
     log_info("done!");
     return SDL_APP_CONTINUE;
