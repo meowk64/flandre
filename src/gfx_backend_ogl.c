@@ -113,43 +113,17 @@ static int compile_shader(lua_State * L, GLuint shader, const char * src)
     return 1;
 }
 
-// 从字符串中获取着色器源代码
+// 从字符串中获取着色器源代码（即将被弃用）
+[[deprecated]]
 static void get_shader_src(lua_State * L, int table_idx, const char * name, char const ** target)
 {
     lua_getfield(L, table_idx, name);
-    if (lua_type(L, -1) == LUA_TSTRING)
-    {
-        *target = lua_tostring(L, -1);
-    }
-    /* 后来发现这段好像没啥意义
-        else if (lua_type(L, -1) == LUA_TUSERDATA)
-        {
-            FILE * src = (FILE *)luaL_checkudata(L, -1, "FILE*");
-
-            fseek(src, 0, SEEK_END);
-            size_t size = ftell(src);
-            fseek(src, 0, SEEK_SET);
-
-            char * str = fln_alloc(size);
-            if (fread((void *)str, 1, size, src) != size)
-            {
-                fln_free(str);
-                fln_error(L, "failed to read shader file `%s`", name);
-            }
-            lua_pop(L, 1); // pop 掉原本的 FILE*
-            lua_pushlstring(L, str, size);
-            fln_free(str);
-            *target = lua_tostring(L, -1);
-        }
-    */
-    else
-    {
-        fln_error(L, "`%s` not found, or invalid type", name);
-    }
+    *target = luaL_checkstring(L, -1);
 }
 
 // Lua 表转换为数组
 // 之后可能会考虑删除
+[[deprecated]]
 static void table_to_array_float(lua_State * L, int index, float arr[], int size)
 {
     for (size_t i = 0; i < size; i++)
@@ -475,7 +449,8 @@ static int l_m_pipeline_uniform(lua_State * L)
     }
     return 0;
 }
-/*
+
+[[deprecated("useless")]]
 static int l_m_pipeline_texture(lua_State * L)
 {
     struct pipeline_t * pl = luaL_checkudata(L, 1, FLN_USERTYPE_PIPELINE);
@@ -505,7 +480,7 @@ static int l_m_pipeline_texture(lua_State * L)
 
     return 0;
 }
-*/
+
 // 可能只会用在创建四边形三角形上（
 // decoder 能加载模型的说
 static int l_mesh(lua_State * L)
