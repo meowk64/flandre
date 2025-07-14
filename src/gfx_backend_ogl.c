@@ -184,8 +184,8 @@ static int l_pipeline(lua_State * L)
     /*
     {
         shaders = {
-            vertex = `string|file*`,
-            fragment = `string|file*`
+            vertex = `string`,
+            fragment = `string`
         },
         vsync = `bool`,  (TODO)
         depth = `bool`,  (TODO)
