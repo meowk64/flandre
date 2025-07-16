@@ -113,16 +113,8 @@ static int compile_shader(lua_State * L, GLuint shader, const char * src)
     return 1;
 }
 
-// 从字符串中获取着色器源代码（即将被弃用）
-[[deprecated]]
-static void get_shader_src(lua_State * L, int table_idx, const char * name, char const ** target)
-{
-    lua_getfield(L, table_idx, name);
-    *target = luaL_checkstring(L, -1);
-}
-
+/*
 // Lua 表转换为数组
-// 之后可能会考虑删除
 [[deprecated]]
 static void table_to_array_float(lua_State * L, int index, float arr[], int size)
 {
@@ -136,7 +128,7 @@ static void table_to_array_float(lua_State * L, int index, float arr[], int size
         arr[i] = lua_tonumber(L, -1);
         lua_pop(L, 1);
     }
-}
+}*/
 
 // 获取 Uniform 位置（带缓存）
 static GLuint get_uniform_location(struct pipeline_t * pl, const char * name)
@@ -215,7 +207,8 @@ static int l_pipeline(lua_State * L)
     }
 
     // vertex
-    get_shader_src(L, -1, "vertex", &vsh_src);
+    lua_getfield(L, -1, "vertex");
+    vsh_src = luaL_checkstring(L, -1);
     GLuint vsh = glCreateShader(GL_VERTEX_SHADER);
     if (!compile_shader(L, vsh, vsh_src))
     {
@@ -226,7 +219,8 @@ static int l_pipeline(lua_State * L)
     lua_pop(L, 1);
 
     // fragment
-    get_shader_src(L, -1, "fragment", &fsh_src);
+    lua_getfield(L, -1, "fragment");
+    fsh_src = luaL_checkstring(L, -1);
     GLuint fsh = glCreateShader(GL_FRAGMENT_SHADER);
     if (!compile_shader(L, fsh, fsh_src))
     {
@@ -392,13 +386,14 @@ static int l_m_pipeline_uniform(lua_State * L)
         }
         else
         {
-            return fln_error(L, "unsupported uniform arguments (unknown userdata)");
+            return fln_error(L, "unsupported uniform arguments (invalid userdata)");
         }
     }
     else if (size == 1 && lua_type(L, 3) == LUA_TNUMBER)
     {
         glUniform1f(location, luaL_checknumber(L, 3));
     }
+    /*
     else if (size == 1 && lua_type(L, 3) == LUA_TTABLE) // 挺讨厌这种的说实话
     {
         size_t len = lua_rawlen(L, 3);
@@ -430,7 +425,7 @@ static int l_m_pipeline_uniform(lua_State * L)
             return fln_error(L, "unsupported uniform table size: %d", (int)len);
         }
         fln_free(values);
-    }
+    }*/
     else if (size == 2 && lua_type(L, 3) == LUA_TNUMBER && lua_type(L, 4) == LUA_TNUMBER)
     {
         glUniform2f(location, luaL_checknumber(L, 3), luaL_checknumber(L, 4));
@@ -445,7 +440,7 @@ static int l_m_pipeline_uniform(lua_State * L)
     }
     else
     {
-        return fln_error(L, "unsupported uniform arguments (unknown size)");
+        return fln_error(L, "unsupported uniform arguments (invalid size)");
     }
     return 0;
 }

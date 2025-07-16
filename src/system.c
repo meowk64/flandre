@@ -79,7 +79,7 @@ static int l_window(lua_State * L)
         }
         }
     }
-    return fln_error(L, "invaild argument number (%d)", top);
+    return fln_error(L, "invalid argument number (%d)", top);
 }
 
 static int l_terminate(lua_State * L)
