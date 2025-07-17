@@ -271,7 +271,7 @@ static int l_m_transform_viewport(lua_State * L)
         float y = luaL_checknumber(L, 3);
         float width = luaL_checknumber(L, 4);
         float height = luaL_checknumber(L, 5);
-        **transform = glms_ortho(x, x + width, y, y + height, -1.f, 1.0f);
+        **transform = glms_ortho(x, x + width, y, y + height, 0.1f, 100.0f);
     }
     else
     {

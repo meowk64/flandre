@@ -3,6 +3,7 @@
 #include <lauxlib.h>
 #include <lua.h>
 #include <stb/stb_truetype.h>
+#include <stddef.h>
 
 #define FLN_USERTYPE_ARCHIVE "fln.archive" // TODO
 #define FLN_USERTYPE_IMAGE "fln.image"
@@ -17,15 +18,18 @@ struct fln_image_t
     unsigned char * data;
 };
 
-struct fln_font_t
+struct fln_character_t
 {
-    unsigned char * raw_data;
-    size_t data_size;
-    stbtt_fontinfo info;
     unsigned char * bitmap;
     size_t bitmap_width;
     size_t bitmap_height;
-    float scale;
+};
+
+struct fln_font_t
+{
+    stbtt_fontinfo info;
+    unsigned char * raw_data;
+    size_t raw_data_size;
 };
 
 int fln_luaopen_decoder(lua_State * L);
