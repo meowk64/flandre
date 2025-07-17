@@ -17,6 +17,7 @@
 #include "memory.h"
 #include "opengl/glad.h"
 #include "system.h"
+#include <bgfx/c99/bgfx.h>
 
 int SDL_AppInit(void ** appstate_, int argc, char * argv[])
 {
@@ -28,13 +29,13 @@ int SDL_AppInit(void ** appstate_, int argc, char * argv[])
     {
         return SDL_APP_FAILURE;
     }
-    *appstate_ = fln_alloc(sizeof(struct fln_app_state_t));
-    struct fln_app_state_t * appstate = (struct fln_app_state_t *)*appstate_;
+    *appstate_ = fln_alloc(sizeof(fln_app_state_t));
+    fln_app_state_t * appstate = (fln_app_state_t *)*appstate_;
     if (!appstate)
     {
         log_error("cannot allocate memory for fln_app_state_t");
     }
-    memset(appstate, 0, sizeof(struct fln_app_state_t));
+    memset(appstate, 0, sizeof(fln_app_state_t));
     log_info("initializing Lua...");
     appstate->L = luaL_newstate();
     if (!appstate)
@@ -52,7 +53,7 @@ int SDL_AppInit(void ** appstate_, int argc, char * argv[])
         return SDL_APP_FAILURE;
     }
     SDL_WindowFlags window_flags = fln_gfx_sdl_configure(appstate);
-    appstate->window = SDL_CreateWindow("Untitled", 1366, 768, window_flags | SDL_WINDOW_RESIZABLE);
+    appstate->window = SDL_CreateWindow("", 1366, 768, window_flags | SDL_WINDOW_RESIZABLE);
     if (!appstate->window)
     {
         log_error("failed to call SDL_CreateWindow()");
@@ -76,7 +77,7 @@ int SDL_AppInit(void ** appstate_, int argc, char * argv[])
 
 int SDL_AppIterate(void * appstate_)
 {
-    struct fln_app_state_t * appstate = (struct fln_app_state_t *)appstate_;
+    fln_app_state_t * appstate = (fln_app_state_t *)appstate_;
     if (fln_should_terminte())
     {
         return SDL_APP_SUCCESS;
@@ -103,7 +104,7 @@ int SDL_AppIterate(void * appstate_)
 
 int SDL_AppEvent(void * appstate_, const SDL_Event * event)
 {
-    struct fln_app_state_t * appstate = (struct fln_app_state_t *)appstate_;
+    fln_app_state_t * appstate = (fln_app_state_t *)appstate_;
     if (event->type == SDL_EVENT_QUIT)
     {
         return SDL_APP_SUCCESS;
@@ -119,7 +120,7 @@ int SDL_AppEvent(void * appstate_, const SDL_Event * event)
 
 void SDL_AppQuit(void * appstate_)
 {
-    struct fln_app_state_t * appstate = (struct fln_app_state_t *)appstate_;
+    fln_app_state_t * appstate = (fln_app_state_t *)appstate_;
     lua_close(appstate->L);
     // lua虚拟机一定要最先关闭，否则一些资源会丢失上下文（例如OpenGL资源会在上下文已经释放过后再释放）
     fln_gfx_destroy_resource(appstate);

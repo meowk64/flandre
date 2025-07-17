@@ -22,7 +22,7 @@ static int l_png(lua_State * L)
     {
         return fln_error(L, "failed to load PNG image: %s", stbi_failure_reason());
     }
-    struct fln_image_t * image = lua_newuserdata(L, sizeof(struct fln_image_t));
+    fln_image_t * image = lua_newuserdata(L, sizeof(fln_image_t));
     luaL_setmetatable(L, FLN_USERTYPE_IMAGE);
     image->width = width;
     image->height = height;
@@ -34,7 +34,7 @@ static int l_png(lua_State * L)
 
 static int l_image_size(lua_State * L)
 {
-    struct fln_image_t * image = luaL_checkudata(L, 1, FLN_USERTYPE_IMAGE);
+    fln_image_t * image = luaL_checkudata(L, 1, FLN_USERTYPE_IMAGE);
     if (image->data)
     {
         lua_pushinteger(L, image->width);
@@ -45,7 +45,7 @@ static int l_image_size(lua_State * L)
 
 static int l_image_release(lua_State * L)
 {
-    struct fln_image_t * image = luaL_checkudata(L, 1, FLN_USERTYPE_IMAGE);
+    fln_image_t * image = luaL_checkudata(L, 1, FLN_USERTYPE_IMAGE);
     if (image->data)
     {
         stbi_image_free(image->data);

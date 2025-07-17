@@ -7,31 +7,31 @@
 
 #include "memory.h"
 
-struct entity_node
+typedef struct entity_node_s
 {
     int id;
-    struct entity_node * next;
-    struct entity_node * prev;
-} entity_node;
+    struct entity_node_s * next;
+    struct entity_node_s * prev;
+} entity_node_t;
 
-struct entities_layer
+typedef struct entities_layer_s
 {
-    struct entity_node * first;
-    struct entity_node * last;
-} entities_layer;
+    entity_node_t * first;
+    entity_node_t * last;
+} entities_layer_t;
 
 // 只是用来作为键的静态值
 static int KEY = 0x0d000721;
 
 #define ENTITIES_LAYERS_SIZE 16
 
-static struct entities_layer entities_layers[ENTITIES_LAYERS_SIZE] = {0};
+static entities_layer_t entities_layers[ENTITIES_LAYERS_SIZE] = {0};
 
 #define get_entities_table(L) lua_rawgetp(L, LUA_REGISTRYINDEX, &KEY)
 
-static struct entity_node * create_entity_node(int ref)
+static entity_node_t * create_entity_node(int ref)
 {
-    struct entity_node * new_node = (struct entity_node *)fln_alloc(sizeof(entity_node));
+    entity_node_t * new_node = (entity_node_t *)fln_alloc(sizeof(entity_node_t));
     if (new_node == nullptr)
     {
         log_error("failed to allocate memory for new entity node");
@@ -43,11 +43,11 @@ static struct entity_node * create_entity_node(int ref)
     return new_node;
 }
 
-static void iterate_layer(lua_State * L, struct entities_layer layer, const char * func_name)
+static void iterate_layer(lua_State * L, entities_layer_t layer, const char * func_name)
 {
     lua_settop(L, 0);
     get_entities_table(L);
-    struct entity_node * current = layer.first;
+    entity_node_t * current = layer.first;
     while (current)
     {
         lua_settop(L, 1);
@@ -96,7 +96,7 @@ static int l_new(lua_State * L)
     lua_newtable(L);
     int ref = luaL_ref(L, -2);
 
-    struct entity_node * new_node = create_entity_node(ref);
+    entity_node_t * new_node = create_entity_node(ref);
     if (new_node == nullptr)
     {
         return fln_error(L, "failed to create new entity node");
@@ -132,7 +132,7 @@ static int l_kill(lua_State * L)
     {
         return 0;
     }
-    struct entity_node * entity = (struct entity_node *)lua_topointer(L, -1);
+    entity_node_t * entity = (entity_node_t *)lua_topointer(L, -1);
     size_t layer = lua_rawgeti(L, 1, -1);
     lua_pushnil(L);
     lua_rawseti(L, 1, 0);

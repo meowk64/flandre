@@ -8,19 +8,19 @@
 
 #include "memory.h"
 
-struct key_state_entry_t
+typedef struct key_state_entry_s
 {
     int key;
     bool state;
     UT_hash_handle hh;
-};
+} key_state_entry_t;
 
-static struct key_state_entry_t * key_states = nullptr;
+static key_state_entry_t * key_states = nullptr;
 
 static int l_pressed(lua_State * L)
 {
     int key = luaL_checkinteger(L, 1);
-    struct key_state_entry_t * entry;
+    key_state_entry_t * entry;
     HASH_FIND_INT(key_states, &key, entry);
     lua_pushboolean(L, entry ? entry->state : false);
     return 1;
@@ -33,7 +33,7 @@ void fln_receive_keyboard_events(const SDL_Event * event)
         int key = event->key.scancode;
         bool is_down = (event->type == SDL_EVENT_KEY_DOWN);
 
-        struct key_state_entry_t * entry;
+        key_state_entry_t * entry;
         HASH_FIND_INT(key_states, &key, entry);
 
         if (entry)
@@ -42,7 +42,7 @@ void fln_receive_keyboard_events(const SDL_Event * event)
         }
         else
         {
-            entry = fln_alloc(sizeof(struct key_state_entry_t));
+            entry = fln_alloc(sizeof(key_state_entry_t));
             if (entry)
             {
                 entry->key = key;
@@ -55,7 +55,7 @@ void fln_receive_keyboard_events(const SDL_Event * event)
 
 void fln_clear_key_states()
 {
-    struct key_state_entry_t *entry, *tmp;
+    key_state_entry_t *entry, *tmp;
     HASH_ITER(hh, key_states, entry, tmp)
     {
         HASH_DEL(key_states, entry);

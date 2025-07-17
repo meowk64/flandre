@@ -15,36 +15,36 @@
 #include "opengl/glad.h"
 
 // OpenGL 的 Uniform 缓存
-struct uniform_cache_entry_t
+typedef struct uniform_cache_entry_s
 {
     char name[64];
     GLuint location;
     UT_hash_handle hh;
-};
+} uniform_cache_entry_t;
 
 // OpenGL 的 Pipeline 实现
-struct pipeline_t
+typedef struct pipeline_s
 {
     GLuint shader_program;
-    struct uniform_cache_entry_t * uniform_cache;
-};
+    uniform_cache_entry_t * uniform_cache;
+} pipeline_t;
 
 // OpenGL 的 Mesh 实现
-struct mesh_t
+typedef struct mesh_s
 {
     GLuint vao;
     GLuint vbo;
     GLuint ebo;
     unsigned int vertices_count;
-};
+} mesh_t;
 
 // OpenGL 的 Texture 实现
-struct texture_t
+typedef struct texture_s
 {
     GLuint id;
     int width;
     int height;
-};
+} texture_t;
 
 // tools ---------------------------------------------------------------------
 
@@ -131,9 +131,9 @@ static void table_to_array_float(lua_State * L, int index, float arr[], int size
 }*/
 
 // 获取 Uniform 位置（带缓存）
-static GLuint get_uniform_location(struct pipeline_t * pl, const char * name)
+static GLuint get_uniform_location(pipeline_t * pl, const char * name)
 {
-    struct uniform_cache_entry_t * entry = nullptr;
+    uniform_cache_entry_t * entry = nullptr;
     HASH_FIND_STR(pl->uniform_cache, name, entry);
     if (entry)
     {
@@ -143,7 +143,7 @@ static GLuint get_uniform_location(struct pipeline_t * pl, const char * name)
     GLuint location = glGetUniformLocation(pl->shader_program, name);
     if (location != -1)
     {
-        entry = (struct uniform_cache_entry_t *)fln_alloc(sizeof(struct uniform_cache_entry_t));
+        entry = (uniform_cache_entry_t *)fln_alloc(sizeof(uniform_cache_entry_t));
         if (!entry)
         {
             log_error("failed to allocate memory for uniform cache entry");
@@ -158,9 +158,9 @@ static GLuint get_uniform_location(struct pipeline_t * pl, const char * name)
 }
 
 // 清理 Uniform 缓存
-static void clear_uniform_cache(struct pipeline_t * pl)
+static void clear_uniform_cache(pipeline_t * pl)
 {
-    struct uniform_cache_entry_t *entry, *tmp;
+    uniform_cache_entry_t *entry, *tmp;
     HASH_ITER(hh, pl->uniform_cache, entry, tmp)
     {
         HASH_DEL(pl->uniform_cache, entry);
@@ -190,7 +190,7 @@ static int l_pipeline(lua_State * L)
     lua_settop(L, 1);
     luaL_checktype(L, 1, LUA_TTABLE);
 
-    struct pipeline_t * pl = lua_newuserdata(L, sizeof(struct pipeline_t));
+    pipeline_t * pl = lua_newuserdata(L, sizeof(pipeline_t));
     luaL_setmetatable(L, FLN_USERTYPE_PIPELINE);
 
     // shaders --------------------------------------------------------
@@ -267,7 +267,7 @@ static int texture_unit_count = 0;   // 用于记录纹理单元，以支持自�
 
 static int l_m_pipeline_submit(lua_State * L)
 {
-    struct pipeline_t * pl = luaL_checkudata(L, 1, FLN_USERTYPE_PIPELINE);
+    pipeline_t * pl = luaL_checkudata(L, 1, FLN_USERTYPE_PIPELINE);
     if (pl->shader_program == 0)
     {
         return fln_error(L, "invalid pipeline");
@@ -279,7 +279,7 @@ static int l_m_pipeline_submit(lua_State * L)
         current_shader_program = pl->shader_program;
     }
 
-    struct mesh_t * mesh = luaL_checkudata(L, 2, FLN_USERTYPE_MESH);
+    mesh_t * mesh = luaL_checkudata(L, 2, FLN_USERTYPE_MESH);
     if (mesh->vertices_count == 0 || mesh->ebo == 0 || mesh->vao == 0 || mesh->vbo == 0)
     {
         return fln_error(L, "invalid mesh");
@@ -300,7 +300,7 @@ static int l_m_pipeline_submit(lua_State * L)
 
 static int l_m_pipeline_release(lua_State * L)
 {
-    struct pipeline_t * pl = luaL_checkudata(L, 1, FLN_USERTYPE_PIPELINE);
+    pipeline_t * pl = luaL_checkudata(L, 1, FLN_USERTYPE_PIPELINE);
     if (pl->shader_program == 0)
     {
         return 0;
@@ -323,7 +323,7 @@ static int l_m_pipeline_release(lua_State * L)
 
 static int l_m_pipeline_uniform(lua_State * L)
 {
-    struct pipeline_t * pl = luaL_checkudata(L, 1, FLN_USERTYPE_PIPELINE);
+    pipeline_t * pl = luaL_checkudata(L, 1, FLN_USERTYPE_PIPELINE);
     if (pl->shader_program == 0)
     {
         return fln_error(L, "invalid pipeline");
@@ -371,7 +371,7 @@ static int l_m_pipeline_uniform(lua_State * L)
             {
                 glUseProgram(pl->shader_program);
             }
-            struct texture_t * texture = (struct texture_t *)texture2d_test;
+            texture_t * texture = (texture_t *)texture2d_test;
 
             GLuint location = get_uniform_location(pl, name);
             if (location == -1)
@@ -519,7 +519,7 @@ static int l_mesh(lua_State * L)
         offset += attributes[i] * sizeof(float);
     }
 
-    struct mesh_t * mesh = lua_newuserdata(L, sizeof(struct mesh_t));
+    mesh_t * mesh = lua_newuserdata(L, sizeof(mesh_t));
     luaL_setmetatable(L, FLN_USERTYPE_MESH);
     mesh->vao = vao;
     mesh->vbo = vbo;
@@ -531,7 +531,7 @@ static int l_mesh(lua_State * L)
 
 static int l_m_mesh_release(lua_State * L)
 {
-    struct mesh_t * mesh = luaL_checkudata(L, -1, FLN_USERTYPE_MESH);
+    mesh_t * mesh = luaL_checkudata(L, -1, FLN_USERTYPE_MESH);
     if (mesh->vertices_count == 0 || mesh->ebo == 0 || mesh->vao == 0 || mesh->vbo == 0)
     {
         return 0;
@@ -548,7 +548,7 @@ static int l_m_mesh_release(lua_State * L)
 
 static int l_texture2d(lua_State * L)
 {
-    struct fln_image_t * image = luaL_checkudata(L, 1, FLN_USERTYPE_IMAGE);
+    fln_image_t * image = luaL_checkudata(L, 1, FLN_USERTYPE_IMAGE);
     if (!image->data)
     {
         return fln_error(L, "invalid image data");
@@ -579,7 +579,7 @@ static int l_texture2d(lua_State * L)
 
     glBindTexture(GL_TEXTURE_2D, 0);
 
-    struct texture_t * texture_data = lua_newuserdata(L, sizeof(struct texture_t));
+    texture_t * texture_data = lua_newuserdata(L, sizeof(texture_t));
     luaL_setmetatable(L, FLN_USERTYPE_TEXTURE2D);
     texture_data->id = texture;
     texture_data->width = image->width;
@@ -590,7 +590,7 @@ static int l_texture2d(lua_State * L)
 
 static int l_texture2d_release(lua_State * L)
 {
-    struct texture_t * texture = luaL_checkudata(L, 1, FLN_USERTYPE_TEXTURE2D);
+    texture_t * texture = luaL_checkudata(L, 1, FLN_USERTYPE_TEXTURE2D);
     if (texture->id)
     {
         glDeleteTextures(1, &texture->id);
@@ -599,7 +599,7 @@ static int l_texture2d_release(lua_State * L)
     return 0;
 }
 
-static SDL_WindowFlags sdl_configure(struct fln_app_state_t * appstate)
+static SDL_WindowFlags sdl_configure(fln_app_state_t * appstate)
 {
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, 0);
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
@@ -608,7 +608,7 @@ static SDL_WindowFlags sdl_configure(struct fln_app_state_t * appstate)
     return SDL_WINDOW_OPENGL;
 }
 
-static bool init_resource(struct fln_app_state_t * appstate)
+static bool init_resource(fln_app_state_t * appstate)
 {
     appstate->ogl_context = SDL_GL_CreateContext(appstate->window);
     if (!appstate->ogl_context)
@@ -630,13 +630,13 @@ static bool init_resource(struct fln_app_state_t * appstate)
     return true;
 }
 
-static bool begin_drawing(struct fln_app_state_t * appstate)
+static bool begin_drawing(fln_app_state_t * appstate)
 {
     glClear(GL_COLOR_BUFFER_BIT);
     return true;
 }
 
-static bool end_drawing(struct fln_app_state_t * appstate)
+static bool end_drawing(fln_app_state_t * appstate)
 {
     SDL_GL_SwapWindow(appstate->window);
     int err = glGetError();
@@ -648,7 +648,7 @@ static bool end_drawing(struct fln_app_state_t * appstate)
     return true;
 }
 
-static bool destroy_resource(struct fln_app_state_t * appstate)
+static bool destroy_resource(fln_app_state_t * appstate)
 {
     if (!SDL_GL_DestroyContext(appstate->ogl_context))
     {
@@ -657,7 +657,7 @@ static bool destroy_resource(struct fln_app_state_t * appstate)
     return true;
 }
 
-static void receive_window_events(struct fln_app_state_t * appstate, const SDL_Event * event)
+static void receive_window_events(fln_app_state_t * appstate, const SDL_Event * event)
 {
     if (event->type == SDL_EVENT_WINDOW_RESIZED)
     {
@@ -670,9 +670,9 @@ static void receive_window_events(struct fln_app_state_t * appstate, const SDL_E
     }
 }
 
-struct fln_gfx_backend_t fln_gfx_init_backend_ogl()
+fln_gfx_backend_t fln_gfx_init_backend_ogl()
 {
-    struct fln_gfx_backend_t backend;
+    fln_gfx_backend_t backend;
     backend.sdl_configure = sdl_configure;
     backend.init_resource = init_resource;
     backend.begin_drawing = begin_drawing;
