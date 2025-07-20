@@ -1,10 +1,11 @@
 #pragma once
 
-#include <lua.h>
+#include "appstate.h"
 #include <SDL3/SDL_video.h>
+#include <lua.h>
 
-void fln_set_window_for_system_module(SDL_Window *);
+void fln_system_init(fln_app_state_t *);
 
 bool fln_should_terminte();
 
-int fln_luaopen_system(lua_State * L);
+int fln_luaopen_system(lua_State *L);
