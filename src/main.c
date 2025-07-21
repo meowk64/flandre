@@ -1,20 +1,18 @@
-#include "mouse.h"
 #define SDL_MAIN_USE_CALLBACKS 1
 #include <SDL3/SDL.h>
 #include <SDL3/SDL_main.h>
-
 #include <lauxlib.h>
 #include <lua.h>
 #include <lualib.h>
 
 #include "appstate.h"
-
 #include "entity.h"
 #include "flandre.h"
 #include "graphics.h"
 #include "keyboard.h"
 #include "log.h"
 #include "memory.h"
+#include "mouse.h"
 #include "opengl/glad.h"
 #include "system.h"
 
@@ -23,7 +21,7 @@ int SDL_AppInit(void **appstate_, int argc, char *argv[]) {
 	log_info("SDL version: %d.%d.%d", SDL_MAJOR_VERSION, SDL_MINOR_VERSION, SDL_MINOR_VERSION);
 	log_info("Lua version: %s.%s.%s", LUA_VERSION_MAJOR, LUA_VERSION_MINOR, LUA_VERSION_RELEASE);
 	log_info("initalizing basic resource...");
-	if (!SDL_SetAppMetadata("Flandre Game Framework", "0.1.0 dev", "flandre")) {
+	if (!SDL_SetAppMetadata("Flandre", "0.1.0 dev", "flandre")) {
 		return SDL_APP_FAILURE;
 	}
 	*appstate_ = fln_alloc(sizeof(fln_app_state_t));
@@ -39,8 +37,7 @@ int SDL_AppInit(void **appstate_, int argc, char *argv[]) {
 	}
 	log_info("opening Lua libraries...");
 	luaL_openlibs(appstate->L);
-	luaL_requiref(appstate->L, "flandre", fln_luaopen, true);
-
+	luaL_requiref(appstate->L, "flandre", fln_luaopen, false);
 	log_info("initializing SDL subsystem (SDL_INIT_VIDEO | SDL_INIT_EVENTS)...");
 	if (!SDL_InitSubSystem(SDL_INIT_VIDEO | SDL_INIT_EVENTS)) {
 		log_error("failed to call SDL_InitSubSystem()");

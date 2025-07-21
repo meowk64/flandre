@@ -1,6 +1,7 @@
 #include "memory.h"
-
 #include <stdlib.h>
+
+// TODO: Memory management
 
 void *fln_alloc(size_t size) {
 	return malloc(size);
@@ -21,3 +22,4 @@ void *fln_realloc(void *ptr, size_t size) {
 void fln_free(void *ptr) {
 	free(ptr);
 }
+

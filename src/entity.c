@@ -9,6 +9,7 @@
 
 typedef struct entity_node_s {
 	int id;
+	int layer;
 	struct entity_node_s *next;
 	struct entity_node_s *prev;
 } entity_node_t;
@@ -34,6 +35,7 @@ static entity_node_t *create_entity_node(int ref) {
 		return nullptr;
 	}
 	new_node->id = ref;
+	new_node->layer = 0;
 	new_node->next = nullptr;
 	new_node->prev = nullptr;
 	return new_node;
@@ -61,6 +63,9 @@ static void iterate_layer(lua_State *L, entities_layer_t layer, const char *func
 			lua_pushvalue(L, 2);
 			int code = lua_pcall(L, 1, 0, 0);
 			if (code != LUA_OK) {
+				// 如果出现问题，将该对象的 `act` 改为不活跃，以避免重复执行出错的函数
+				lua_pushboolean(L, false);
+				lua_setfield(L, 2, "act");
 				log_error("(in runtime) (%s|error code: %d) %s", func_name, code, lua_tostring(L, -1));
 			}
 		}
@@ -98,10 +103,9 @@ static int l_new(lua_State *L) {
 
 	lua_rawgeti(L, -1, ref);
 
+	entities_layers[layer].last->layer = layer;
 	lua_pushlightuserdata(L, (void *)entities_layers[layer].last);
 	lua_rawseti(L, -2, 0);
-	lua_pushinteger(L, layer);
-	lua_rawseti(L, -2, -1);
 	lua_pushboolean(L, 1);
 	lua_setfield(L, -2, "act");
 	return 1;
@@ -113,7 +117,7 @@ static int l_kill(lua_State *L) {
 		return 0;
 	}
 	entity_node_t *entity = (entity_node_t *)lua_topointer(L, -1);
-	size_t layer = lua_rawgeti(L, 1, -1);
+	size_t layer = entity->layer;
 	lua_pushnil(L);
 	lua_rawseti(L, 1, 0);
 

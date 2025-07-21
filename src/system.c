@@ -6,17 +6,17 @@
 #include <lauxlib.h>
 #include <lua.h>
 
-static const char *const window_options[] = {
-	"size",
-	"title",
-	"fullscreen", nullptr
-};
-
 static SDL_Window *window;
 
 static bool terminate = false;
 
 static int l_window(lua_State *L) {
+	static const char *const window_options[] = {
+		"size",
+		"title",
+		"fullscreen",
+		nullptr
+	};
 	static bool is_fullscreen = false;
 
 	int idx = luaL_checkoption(L, 1, nullptr, window_options);

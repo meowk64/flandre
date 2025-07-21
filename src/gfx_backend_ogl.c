@@ -100,23 +100,6 @@ static int compile_shader(lua_State *L, GLuint shader, const char *src) {
 	return 1;
 }
 
-/*
-// Lua 表转换为数组
-[[deprecated]]
-static void table_to_array_float(lua_State * L, int index, float arr[], int size)
-{
-	for (size_t i = 0; i < size; i++)
-	{
-		lua_rawgeti(L, index, i + 1);
-		if (!lua_isnumber(L, -1))
-		{
-			fln_error(L, "invalid type in table at index %d", i + 1);
-		}
-		arr[i] = lua_tonumber(L, -1);
-		lua_pop(L, 1);
-	}
-}*/
-
 // 获取 Uniform 位置（带缓存）
 static GLuint get_uniform_location(pipeline_t *pl, const char *name) {
 	uniform_cache_entry_t *entry = nullptr;
@@ -340,39 +323,6 @@ static int l_m_pipeline_uniform(lua_State *L) {
 	} else if (size == 1 && lua_type(L, 3) == LUA_TNUMBER) {
 		glUniform1f(location, luaL_checknumber(L, 3));
 	}
-	/*
-	else if (size == 1 && lua_type(L, 3) == LUA_TTABLE)
-	{
-		size_t len = lua_rawlen(L, 3);
-		float * values = fln_alloc(len * sizeof(float));
-		table_to_array_float(L, 3, values, len);
-		if (len == 2)
-		{
-			glUniform2fv(location, 1, values);
-		}
-		else if (len == 3)
-		{
-			glUniform3fv(location, 1, values);
-		}
-		else if (len == 4)
-		{
-			glUniform4fv(location, 1, values);
-		}
-		else if (len == 9)
-		{
-			glUniformMatrix3fv(location, 1, GL_FALSE, values);
-		}
-		else if (len == 16)
-		{
-			glUniformMatrix4fv(location, 1, GL_FALSE, values);
-		}
-		else
-		{
-			fln_free(values);
-			return fln_error(L, "unsupported uniform table size: %d", (int)len);
-		}
-		fln_free(values);
-	}*/
 	else if (size == 2 && lua_type(L, 3) == LUA_TNUMBER && lua_type(L, 4) == LUA_TNUMBER) {
 		glUniform2f(location, luaL_checknumber(L, 3), luaL_checknumber(L, 4));
 	} else if (size == 3 && lua_type(L, 3) == LUA_TNUMBER && lua_type(L, 4) == LUA_TNUMBER && lua_type(L, 5) == LUA_TNUMBER) {
@@ -380,7 +330,7 @@ static int l_m_pipeline_uniform(lua_State *L) {
 	} else if (size == 4 && lua_type(L, 3) == LUA_TNUMBER && lua_type(L, 4) == LUA_TNUMBER && lua_type(L, 5) == LUA_TNUMBER && lua_type(L, 6) == LUA_TNUMBER) {
 		glUniform4f(location, luaL_checknumber(L, 3), luaL_checknumber(L, 4), luaL_checknumber(L, 5), luaL_checknumber(L, 6));
 	} else {
-		return fln_error(L, "unsupported uniform arguments (invalid size)");
+		return fln_error(L, "unsupported uniform arguments (invalid size or type)");
 	}
 	return 0;
 }
@@ -548,10 +498,7 @@ static void receive_window_events(fln_app_state_t *appstate, const SDL_Event *ev
 	if (event->type == SDL_EVENT_WINDOW_RESIZED) {
 		int w, h;
 		SDL_GetWindowSize(appstate->window, &w, &h);
-		glViewport(0,
-				0,
-				w,
-				h); // TODO: 不能直接更改 viewport，因为 SDL 的事件接收回调可能会在别的线程被调用
+		glViewport(0, 0, w, h); // TODO: 不能直接更改 viewport，因为 SDL 的事件接收回调可能会在别的线程被调用
 	}
 }
 
