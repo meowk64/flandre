@@ -10,56 +10,44 @@
 #include "flandre.h"
 #include "graphics.h"
 #include "keyboard.h"
-#include "log.h"
 #include "memory.h"
 #include "mouse.h"
 #include "opengl/glad.h"
 #include "system.h"
 
 int SDL_AppInit(void **appstate_, int argc, char *argv[]) {
-	log_info("Flandre game framework | dev-0.1.0");
-	log_info("SDL version: %d.%d.%d", SDL_MAJOR_VERSION, SDL_MINOR_VERSION, SDL_MINOR_VERSION);
-	log_info("Lua version: %s.%s.%s", LUA_VERSION_MAJOR, LUA_VERSION_MINOR, LUA_VERSION_RELEASE);
-	log_info("initalizing basic resource...");
 	if (!SDL_SetAppMetadata("Flandre", "0.1.0 dev", "flandre")) {
 		return SDL_APP_FAILURE;
 	}
 	*appstate_ = fln_alloc(sizeof(fln_app_state_t));
 	fln_app_state_t *appstate = (fln_app_state_t *)*appstate_;
 	if (!appstate) {
-		log_error("cannot allocate memory for fln_app_state_t");
+		printf("cannot allocate memory for fln_app_state_t\n");
 	}
 	memset(appstate, 0, sizeof(fln_app_state_t));
-	log_info("initializing Lua...");
 	appstate->L = luaL_newstate();
 	if (!appstate) {
-		log_error("cannot allocate memory for lua_State");
+		printf("cannot allocate memory for lua_State\n");
 	}
-	log_info("opening Lua libraries...");
 	luaL_openlibs(appstate->L);
 	luaL_requiref(appstate->L, "flandre", fln_luaopen, false);
-	log_info("initializing SDL subsystem (SDL_INIT_VIDEO | SDL_INIT_EVENTS)...");
 	if (!SDL_InitSubSystem(SDL_INIT_VIDEO | SDL_INIT_EVENTS)) {
-		log_error("failed to call SDL_InitSubSystem()");
+		printf("failed to call SDL_InitSubSystem()\n");
 		return SDL_APP_FAILURE;
 	}
 	SDL_WindowFlags window_flags = fln_gfx_sdl_configure(appstate);
 	appstate->window = SDL_CreateWindow("", 1366, 768, window_flags | SDL_WINDOW_RESIZABLE);
 	if (!appstate->window) {
-		log_error("failed to call SDL_CreateWindow()");
+		printf("failed to call SDL_CreateWindow()\n");
 		return SDL_APP_FAILURE;
 	}
 	fln_system_init(appstate);
-	log_info("initializing graphical device...");
 	if (!fln_gfx_init_resource(appstate)) {
 		return SDL_APP_FAILURE;
 	}
-	SDL_ShowWindow(appstate->window);
-	log_info("loading program entry...");
 	if (luaL_dofile(appstate->L, "main.lua")) {
-		log_error("(in entry) %s", lua_tostring(appstate->L, -1));
+		printf("(in entry) %s\n", lua_tostring(appstate->L, -1));
 	}
-	log_info("done!");
 	return SDL_APP_CONTINUE;
 }
 

@@ -27,4 +27,4 @@ typedef struct fln_font_s {
 	size_t raw_data_size;
 } fln_font_t;
 
-int fln_luaopen_decoder(lua_State *L);
+int fln_luaopen_data(lua_State *L);

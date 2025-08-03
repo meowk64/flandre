@@ -1,5 +1,5 @@
 #include "flandre.h"
-#include "decoder.h"
+#include "data.h"
 #include "entity.h"
 #include "graphics.h"
 #include "keyboard.h"
@@ -21,9 +21,9 @@ int fln_luaopen(lua_State *L) {
 	lua_call(L, 0, 1);
 	lua_setfield(L, 1, "timer");
 
-	lua_pushcfunction(L, fln_luaopen_decoder);
+	lua_pushcfunction(L, fln_luaopen_data);
 	lua_call(L, 0, 1);
-	lua_setfield(L, 1, "decoder");
+	lua_setfield(L, 1, "data");
 
 	lua_pushcfunction(L, fln_luaopen_entity);
 	lua_call(L, 0, 1);

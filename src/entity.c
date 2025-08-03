@@ -1,7 +1,6 @@
 #include "entity.h"
 
 #include "error.h"
-#include "log.h"
 #include <lauxlib.h>
 #include <lua.h>
 
@@ -28,19 +27,6 @@ static entities_layer_t entities_layers[ENTITIES_LAYERS_SIZE] = { 0 };
 
 #define get_entities_table(L) lua_rawgetp(L, LUA_REGISTRYINDEX, &KEY)
 
-static entity_node_t *create_entity_node(int ref) {
-	entity_node_t *new_node = (entity_node_t *)fln_alloc(sizeof(entity_node_t));
-	if (new_node == nullptr) {
-		log_error("failed to allocate memory for new entity node");
-		return nullptr;
-	}
-	new_node->id = ref;
-	new_node->layer = 0;
-	new_node->next = nullptr;
-	new_node->prev = nullptr;
-	return new_node;
-}
-
 static void iterate_layer(lua_State *L, entities_layer_t layer, const char *func_name) {
 	lua_settop(L, 0);
 	get_entities_table(L);
@@ -66,7 +52,7 @@ static void iterate_layer(lua_State *L, entities_layer_t layer, const char *func
 				// 如果出现问题，将该对象的 `act` 改为不活跃，以避免重复执行出错的函数
 				lua_pushboolean(L, false);
 				lua_setfield(L, 2, "act");
-				log_error("(in runtime) (%s|error code: %d) %s", func_name, code, lua_tostring(L, -1));
+				printf("(in runtime) (%s|error code: %d) %s\n", func_name, code, lua_tostring(L, -1));
 			}
 		}
 		lua_settop(L, 2);
@@ -76,10 +62,10 @@ static void iterate_layer(lua_State *L, entities_layer_t layer, const char *func
 static int l_new(lua_State *L) {
 	int layer = luaL_optinteger(L, 1, 0);
 	if (layer > 16) {
-		log_warn("attempt to create an entity at layer %d (>16), it has been changed to 16", layer);
+		fln_warning("attempt to create an entity at layer %d (>16), it has been limited to 16", layer);
 		layer = 16;
 	} else if (layer < 0) {
-		log_warn("attempt to create an entity at layer %d (<16), it has been changed to 0", layer);
+		fln_warning("attempt to create an entity at layer %d (<0), it has been limited to 0", layer);
 		layer = 0;
 	}
 	lua_settop(L, 0);
@@ -87,11 +73,15 @@ static int l_new(lua_State *L) {
 	lua_newtable(L);
 	int ref = luaL_ref(L, -2);
 
-	entity_node_t *new_node = create_entity_node(ref);
+	entity_node_t *new_node = (entity_node_t *)fln_alloc(sizeof(entity_node_t));
+	new_node->id = ref;
+	new_node->layer = 0;
+	new_node->next = nullptr;
+	new_node->prev = nullptr;
+
 	if (new_node == nullptr) {
 		return fln_error(L, "failed to create new entity node");
 	}
-
 	if (entities_layers[layer].first == nullptr) {
 		entities_layers[layer].first = new_node;
 		entities_layers[layer].last = new_node;
@@ -162,7 +152,7 @@ bool fln_iterate_entites(lua_State *L) {
 	lua_settop(L, 0);
 	lua_pushcfunction(L, pri_l_iterate);
 	if (lua_pcall(L, 0, 0, 0) != LUA_OK) {
-		log_error("(unexpected) lua: %s", lua_tostring(L, -1));
+		printf("(unexpected) lua: %s\n", lua_tostring(L, -1));
 		return false;
 	}
 	return true;
@@ -172,7 +162,7 @@ bool fln_draw_entities(lua_State *L) {
 	lua_settop(L, 0);
 	lua_pushcfunction(L, pri_l_draw);
 	if (lua_pcall(L, 0, 0, 0) != LUA_OK) {
-		log_error("(unexpected) lua: %s", lua_tostring(L, -1));
+		printf("(unexpected) lua: %s\n", lua_tostring(L, -1));
 		return false;
 	}
 	return true;

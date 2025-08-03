@@ -1,7 +1,6 @@
 #include "system.h"
 
 #include "error.h"
-#include "log.h"
 #include <SDL3/SDL_video.h>
 #include <lauxlib.h>
 #include <lua.h>
@@ -72,8 +71,8 @@ static int l_window(lua_State *L) {
 static int l_terminate(lua_State *L) {
 	if (!terminate) {
 		terminate = true;
-		log_info("`flandre.system.terminate` has been called!");
-		log_info("the program will be terminate at the next frame!");
+		printf("`flandre.system.terminate` has been called!\n");
+		printf("the program will be terminate at the next frame!\n");
 	} else {
 		return fln_error(L, "attempt to terminate the program twice");
 	}

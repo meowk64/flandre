@@ -1,4 +1,4 @@
-#include "decoder.h"
+#include "data.h"
 
 #include "error.h"
 #include <lauxlib.h>
@@ -24,7 +24,6 @@ static int l_png(lua_State *L) {
 	luaL_setmetatable(L, FLN_USERTYPE_IMAGE);
 	image->width = width;
 	image->height = height;
-	// 说实话，有必要支持那么多种格式吗
 	image->format = FLN_IMAGE_FORMAT_RGBA8U;
 	image->data = img_data;
 
@@ -86,15 +85,12 @@ static int l_font_generate(lua_State * L)
 	int x = 0;
 	for (size_t i = 0; i < strlen(text); i++)
 	{
-		log_info("www");
 		int advance_width = 0;
 		int left_side_bearing = 0;
 		stbtt_GetCodepointHMetrics(&font->info, text[i], &advance_width, &left_side_bearing);
-		log_info("www");
 		int broder_x1, broder_y1, broder_x2, broder_y2;
 		stbtt_GetCodepointBitmapBox(&font->info, text[i], scale, scale, &broder_x1, &broder_y1, &broder_x2, &broder_y2);
 		int y = ascent + broder_y1;
-		log_info("www");
 		x += roundf(advance_width * scale);
 		int kern = stbtt_GetCodepointKernAdvance(&font->info, text[i], text[i + 1]);
 		x += roundf(kern * scale);
@@ -114,7 +110,7 @@ static int l_font_release(lua_State * L)
 	return 0;
 }
 */
-int fln_luaopen_decoder(lua_State *L) {
+int fln_luaopen_data(lua_State *L) {
 	stbi_set_flip_vertically_on_load(1);
 	const luaL_Reg image_meths[] = {
 		{ "size", l_image_size },

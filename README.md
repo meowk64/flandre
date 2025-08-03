@@ -24,8 +24,6 @@ _Sorry, this page does not currently have an English version._
 
 `glad` https://gen.glad.sh/
 
-`log.c` https://github.com/rxi/log.c
-
 ## 构建
 
 ```shell

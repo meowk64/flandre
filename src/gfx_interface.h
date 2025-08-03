@@ -21,6 +21,7 @@ typedef struct fln_gfx_backend_s {
 	lua_CFunction l_pipeline_release;
 	lua_CFunction l_pipeline_uniform;
 	lua_CFunction l_pipeline_submit;
+	lua_CFunction l_pipeline_submit_instanced;
 	lua_CFunction l_mesh;
 	lua_CFunction l_mesh_release;
 	lua_CFunction l_texture2d;

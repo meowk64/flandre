@@ -6,10 +6,9 @@
 #include <lua.h>
 #include <uthash.h>
 
-#include "decoder.h"
+#include "data.h"
 #include "error.h"
 #include "gfx_interface.h"
-#include "log.h"
 #include "math.h"
 #include "memory.h"
 #include "opengl/glad.h"
@@ -101,7 +100,7 @@ static int compile_shader(lua_State *L, GLuint shader, const char *src) {
 }
 
 // 获取 Uniform 位置（带缓存）
-static GLuint get_uniform_location(pipeline_t *pl, const char *name) {
+static GLuint get_uniform_location_cache(pipeline_t *pl, const char *name) {
 	uniform_cache_entry_t *entry = nullptr;
 	HASH_FIND_STR(pl->uniform_cache, name, entry);
 	if (entry) {
@@ -111,8 +110,7 @@ static GLuint get_uniform_location(pipeline_t *pl, const char *name) {
 		if (location != -1) {
 			entry = (uniform_cache_entry_t *)fln_alloc(sizeof(uniform_cache_entry_t));
 			if (!entry) {
-				log_error("failed to allocate memory for uniform cache entry");
-				return -1; // 内存分配失败
+				return -2; // 内存分配失败
 			}
 			strncpy(entry->name, name, sizeof(entry->name) - 1);
 			entry->name[sizeof(entry->name) - 1] = '\0';
@@ -214,10 +212,6 @@ static int l_pipeline(lua_State *L) {
 	return 1;
 }
 
-// 为了尽量减少对 OpenGL 的调用，缓存了一下
-// NOTICE: 实际上只需要其中一个就行了，因为每个 pipeline 对象的着色器和 VAO 都是唯一的
-//         不过为了防止之后由于共享数据而出问题的可能，所以还是两个都跟踪了（懒）
-//         反正多写点也不会怀孕（？
 static GLuint current_shader_program = 0;
 static GLuint current_vao = 0;
 static int texture_unit_count = 0; // 用于记录纹理单元，以支持自动传入多个纹理
@@ -250,6 +244,35 @@ static int l_m_pipeline_submit(lua_State *L) {
 	return 0;
 }
 
+static int l_m_pipeline_submit_instanced(lua_State *L) {
+	pipeline_t *pl = luaL_checkudata(L, 1, FLN_USERTYPE_PIPELINE);
+	lua_Integer num = luaL_checkinteger(L, 2);
+	if (pl->shader_program == 0) {
+		return fln_error(L, "invalid pipeline");
+	}
+
+	if (current_shader_program != pl->shader_program) {
+		glUseProgram(pl->shader_program);
+		current_shader_program = pl->shader_program;
+	}
+
+	mesh_t *mesh = luaL_checkudata(L, 2, FLN_USERTYPE_MESH);
+	if (mesh->vertices_count == 0 || mesh->ebo == 0 || mesh->vao == 0 || mesh->vbo == 0) {
+		return fln_error(L, "invalid mesh");
+	}
+
+	if (mesh->vao != current_vao) {
+		glBindVertexArray(mesh->vao);
+		current_vao = mesh->vao;
+	}
+
+	glDrawElementsInstanced(GL_TRIANGLES, mesh->vertices_count, GL_UNSIGNED_INT, nullptr, num);
+
+	texture_unit_count = 0;
+
+	return 0;
+}
+
 static int l_m_pipeline_release(lua_State *L) {
 	pipeline_t *pl = luaL_checkudata(L, 1, FLN_USERTYPE_PIPELINE);
 	if (pl->shader_program == 0) {
@@ -276,9 +299,12 @@ static int l_m_pipeline_uniform(lua_State *L) {
 	}
 	glUseProgram(pl->shader_program);
 	const char *name = luaL_checkstring(L, 2);
-	GLuint location = get_uniform_location(pl, name);
+	GLuint location = get_uniform_location_cache(pl, name);
 	if (location == -1) {
 		return fln_error(L, "uniform '%s' not found", name);
+	}
+	else if (location == -2) {
+		return fln_error(L, "failed to allocate memory for uniform cache entry");
 	}
 
 	int size = lua_gettop(L) - 2; // 除去 self 和 uniform 名称，之后的参数都是要传入 uniform 的
@@ -308,9 +334,12 @@ static int l_m_pipeline_uniform(lua_State *L) {
 			}
 			texture_t *texture = (texture_t *)texture2d_test;
 
-			GLuint location = get_uniform_location(pl, name);
+			GLuint location = get_uniform_location_cache(pl, name);
 			if (location == -1) {
 				return fln_error(L, "uniform '%s' not found", name);
+			}
+			else if (location == -2) {
+				return fln_error(L, "failed to allocate memory for uniform cache entry");
 			}
 
 			glActiveTexture(GL_TEXTURE0 + texture_unit_count);
@@ -336,7 +365,7 @@ static int l_m_pipeline_uniform(lua_State *L) {
 }
 
 // 可能只会用在创建四边形三角形上（
-// decoder 能加载模型的说
+// data 能加载模型的说
 static int l_mesh(lua_State *L) {
 	lua_settop(L, 3);
 	const float *vertices = (const float *)luaL_checkstring(L, 1);
@@ -350,6 +379,17 @@ static int l_mesh(lua_State *L) {
 	const unsigned int *attributes = (const unsigned int *)luaL_checkstring(L, 3);
 	const size_t attributes_size = luaL_len(L, 3);
 	const size_t attributes_count = attributes_size / sizeof(unsigned int);
+
+	const unsigned int *divisors = (const unsigned int *)luaL_optstring(L, 4, nullptr);
+	size_t divisors_size = 0;
+	size_t divisors_count = 0;
+	if (divisors) {
+		divisors_size = luaL_len(L, 4);
+		divisors_count = divisors_size / sizeof(unsigned int);
+		if (attributes_count != divisors_count) {
+			return fln_error(L, "attributes count must equal to divisors count");
+		}
+	}
 
 	GLuint vao, vbo, ebo;
 	glGenVertexArrays(1, &vao);
@@ -371,6 +411,9 @@ static int l_mesh(lua_State *L) {
 	for (size_t i = 0; i < attributes_count; i++) {
 		glVertexAttribPointer(i, attributes[i], GL_FLOAT, GL_FALSE, stride, (void *)(uintptr_t)offset);
 		glEnableVertexAttribArray(i);
+		if (divisors) {
+			glVertexAttribDivisor(i, divisors[i]);
+		}
 		offset += attributes[i] * sizeof(float);
 	}
 
@@ -457,15 +500,15 @@ static SDL_WindowFlags sdl_configure(fln_app_state_t *appstate) {
 static bool init_resource(fln_app_state_t *appstate) {
 	appstate->ogl_context = SDL_GL_CreateContext(appstate->window);
 	if (!appstate->ogl_context) {
-		log_error("failed to call SDL_GL_CreateContext()");
+		printf("failed to call SDL_GL_CreateContext()\n");
 		return false;
 	}
 	if (!SDL_GL_MakeCurrent(appstate->window, appstate->ogl_context)) {
-		log_error("failed to call SDL_GL_MakeCurrent()");
+		printf("failed to call SDL_GL_MakeCurrent()\n");
 		return false;
 	}
 	if (!gladLoadGLLoader((GLADloadproc)SDL_GL_GetProcAddress)) {
-		log_error("failed to call gladLoadGLLoader()");
+		printf("failed to call gladLoadGLLoader()\n");
 		return false;
 	}
 	glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
@@ -481,7 +524,7 @@ static bool end_drawing(fln_app_state_t *appstate) {
 	SDL_GL_SwapWindow(appstate->window);
 	int err = glGetError();
 	if (err != GL_NO_ERROR) {
-		log_error("OpenGL error: %d", err);
+		printf("OpenGL error: %d\n", err);
 		return false;
 	}
 	return true;
@@ -489,7 +532,7 @@ static bool end_drawing(fln_app_state_t *appstate) {
 
 static bool destroy_resource(fln_app_state_t *appstate) {
 	if (!SDL_GL_DestroyContext(appstate->ogl_context)) {
-		log_error("failed to call SDL_GL_DestroyContext()");
+		printf("failed to call SDL_GL_DestroyContext()\n");
 	}
 	return true;
 }
@@ -514,6 +557,7 @@ fln_gfx_backend_t fln_gfx_init_backend_ogl() {
 	backend.l_pipeline_release = l_m_pipeline_release;
 	backend.l_pipeline_uniform = l_m_pipeline_uniform;
 	backend.l_pipeline_submit = l_m_pipeline_submit;
+	backend.l_pipeline_submit_instanced = l_m_pipeline_submit_instanced;
 	backend.l_mesh = l_mesh;
 	backend.l_mesh_release = l_m_mesh_release;
 	backend.l_texture2d = l_texture2d;
