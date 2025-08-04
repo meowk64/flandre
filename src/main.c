@@ -1,3 +1,10 @@
+/*
+	This file is part of Flandre
+	Copyright (C) 2025 Teabagus
+
+	Flandre is free software: you can redistribute it and/or modify
+	it under the terms of the MIT License.
+*/
 #define SDL_MAIN_USE_CALLBACKS 1
 #include <SDL3/SDL.h>
 #include <SDL3/SDL_main.h>
