@@ -16,7 +16,7 @@
 
 static int l_transform(lua_State *L) {
 	bool identity = lua_toboolean(L, 1);
-	mat4s **transform = lua_newuserdata(L, sizeof(mat4s));
+	mat4s **transform = lua_newuserdata(L, sizeof(mat4s*));
 	*transform = fln_alloc(sizeof(mat4s));
 	luaL_setmetatable(L, FLN_USERTYPE_TRANSFORM);
 
