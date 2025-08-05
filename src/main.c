@@ -5,6 +5,10 @@
 	Flandre is free software: you can redistribute it and/or modify
 	it under the terms of the MIT License.  See `LICENSE` for more details
 */
+#include <cglm/cglm.h>
+#include <cglm/mat4.h>
+#include <cglm/types.h>
+#include <string.h>
 #define SDL_MAIN_USE_CALLBACKS 1
 #include <SDL3/SDL.h>
 #include <SDL3/SDL_main.h>
@@ -49,11 +53,11 @@ int SDL_AppInit(void **appstate_, int argc, char *argv[]) {
 		return SDL_APP_FAILURE;
 	}
 	fln_system_init(appstate);
-	if (!fln_gfx_init_resource(appstate)) {
+	if (!fln_gfx_init(appstate)) {
 		return SDL_APP_FAILURE;
 	}
 	if (luaL_dofile(appstate->L, "main.lua")) {
-		printf("(in entry) %s\n", lua_tostring(appstate->L, -1));
+		printf("(in script) (main) %s\n", lua_tostring(appstate->L, -1));
 	}
 	return SDL_APP_CONTINUE;
 }

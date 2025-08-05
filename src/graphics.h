@@ -19,7 +19,7 @@ int fln_luaopen_graphics(lua_State *L);
 
 SDL_WindowFlags fln_gfx_sdl_configure(fln_app_state_t *appstate);
 
-bool fln_gfx_init_resource(fln_app_state_t *appstate);
+bool fln_gfx_init(fln_app_state_t *appstate);
 
 void fln_gfx_begin_drawing(fln_app_state_t *appstate);
 

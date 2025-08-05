@@ -18,7 +18,10 @@
 #define FLN_USERTYPE_FONT "fln.font"
 
 typedef enum fln_image_format_e {
-	FLN_IMAGE_FORMAT_RGBA8U,
+	FLN_IMAGE_FORMAT_R8,
+	FLN_IMAGE_FORMAT_RG8,
+	FLN_IMAGE_FORMAT_RGB8,
+	FLN_IMAGE_FORMAT_RGBA8,
 } fln_image_format_t;
 
 typedef struct fln_image_s {

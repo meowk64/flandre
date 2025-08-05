@@ -16,7 +16,7 @@ _Sorry, this page does not currently have an English version._
 
 `Lua 5.4` https://lua.org/
 
-`stb_*` https://github.com/nothings/stb
+`libpng` https://www.libpng.org
 
 `uthash` https://troydhanson.github.io/uthash/
 

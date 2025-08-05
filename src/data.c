@@ -8,32 +8,75 @@
 #include "data.h"
 
 #include "error.h"
+#include "memory.h"
 #include <lauxlib.h>
 #include <lua.h>
 
-#define STB_IMAGE_IMPLEMENTATION
-#include <stb/stb_image.h>
-#define STB_TRUETYPE_IMPLEMENTATION
-#include <stb/stb_truetype.h>
+#include <png.h>
+#include <pngconf.h>
+
+static bool chack_png_error(png_image *context) {
+	const png_uint_32 failed = PNG_IMAGE_FAILED(*context);
+	if (failed & PNG_IMAGE_ERROR) {
+		return true;
+	}
+	else {
+		return false;
+	}
+}
 
 static int l_png(lua_State *L) {
 	const char *data = luaL_checkstring(L, 1);
 	lua_len(L, 1);
 	size_t size = lua_tointeger(L, -1);
 
-	int width, height, channels;
-	unsigned char *img_data = stbi_load_from_memory((const unsigned char *)data, size, &width, &height, &channels, STBI_rgb_alpha);
+	png_image context;
+	fln_image_format_t fmt;
 
-	if (!img_data) {
-		return fln_error(L, "failed to load PNG image: %s", stbi_failure_reason());
+	context.version = PNG_IMAGE_VERSION;
+	context.opaque = nullptr;
+
+	{
+		int res = png_image_begin_read_from_memory(&context, data, size);
+		if (chack_png_error(&context)) {
+			return fln_error(L, "PNG error: %s", context.message);
+		}
+	}
+	context.format &= ~(PNG_FORMAT_FLAG_BGR | PNG_FORMAT_FLAG_AFIRST | PNG_FORMAT_FLAG_LINEAR | PNG_FORMAT_FLAG_COLORMAP);
+	switch (context.format) {
+		case PNG_FORMAT_GRAY:
+			fmt = FLN_IMAGE_FORMAT_R8;
+			break;
+		case PNG_FORMAT_GA:
+			fmt = FLN_IMAGE_FORMAT_RG8;
+			break;
+		case PNG_FORMAT_RGB:
+			fmt = FLN_IMAGE_FORMAT_RGB8;
+			break;
+		case PNG_FORMAT_RGBA:
+			fmt = FLN_IMAGE_FORMAT_RGBA8;
+			break;
+		default:
+			png_image_free(&context);
+			return fln_error(L, "unsupported image format");
+	}
+	unsigned int stride = PNG_IMAGE_ROW_STRIDE(context);
+	unsigned char *img_data = fln_alloc(PNG_IMAGE_BUFFER_SIZE(context, stride));
+	if (img_data == nullptr) {
+		return fln_error(L, "bad alloc");
+	}
+	{
+		int res = png_image_finish_read(&context, nullptr, img_data, stride, nullptr);
+		if (chack_png_error(&context)) {
+			return fln_error(L, "PNG error: %s", context.message);
+		}
 	}
 	fln_image_t *image = lua_newuserdata(L, sizeof(fln_image_t));
 	luaL_setmetatable(L, FLN_USERTYPE_IMAGE);
-	image->width = width;
-	image->height = height;
-	image->format = FLN_IMAGE_FORMAT_RGBA8U;
+	image->width = context.width;
+	image->height = context.height;
+	image->format = fmt;
 	image->data = img_data;
-
 	return 1;
 }
 
@@ -49,7 +92,7 @@ static int l_image_size(lua_State *L) {
 static int l_image_release(lua_State *L) {
 	fln_image_t *image = luaL_checkudata(L, 1, FLN_USERTYPE_IMAGE);
 	if (image->data) {
-		stbi_image_free(image->data);
+		fln_free(image->data);
 		image->data = nullptr;
 	}
 	return 0;
@@ -118,7 +161,6 @@ static int l_font_release(lua_State * L)
 }
 */
 int fln_luaopen_data(lua_State *L) {
-	stbi_set_flip_vertically_on_load(1);
 	const luaL_Reg image_meths[] = {
 		{ "size", l_image_size },
 		{ "release", l_image_release },

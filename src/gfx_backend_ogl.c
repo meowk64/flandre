@@ -42,11 +42,11 @@ typedef struct mesh_s {
 } mesh_t;
 
 // OpenGL 的 Texture 实现
-typedef struct texture_s {
+typedef struct texture2d_s {
 	GLuint id;
 	int width;
 	int height;
-} texture_t;
+} texture2d_t;
 
 // tools ---------------------------------------------------------------------
 
@@ -339,7 +339,7 @@ static int l_m_pipeline_uniform(lua_State *L) {
 			if (current_shader_program != pl->shader_program) {
 				glUseProgram(pl->shader_program);
 			}
-			texture_t *texture = (texture_t *)texture2d_test;
+			texture2d_t *texture = (texture2d_t *)texture2d_test;
 
 			GLuint location = get_uniform_location_cache(pl, name);
 			if (location == -1) {
@@ -354,7 +354,7 @@ static int l_m_pipeline_uniform(lua_State *L) {
 			glUniform1i(location, texture_unit_count);
 			texture_unit_count++;
 		} else {
-			return fln_error(L, "unsupported uniform arguments (invalid userdata)");
+			return fln_error(L, "invalid userdata");
 		}
 	} else if (size == 1 && lua_type(L, 3) == LUA_TNUMBER) {
 		glUniform1f(location, luaL_checknumber(L, 3));
@@ -454,7 +454,14 @@ static int l_texture2d(lua_State *L) {
 	if (!image->data) {
 		return fln_error(L, "invalid image data");
 	}
-	if (image->format != FLN_IMAGE_FORMAT_RGBA8U) {
+	GLint format;
+	if (image->format == FLN_IMAGE_FORMAT_RGBA8) {
+		format = GL_RGBA;
+	}
+	else if (image->format == FLN_IMAGE_FORMAT_RGB8) {
+		format = GL_RGB;
+	}
+	else {
 		return fln_error(L, "invalid image format: %d", image->format);
 	}
 	if (image->width <= 0 || image->height <= 0) {
@@ -474,11 +481,11 @@ static int l_texture2d(lua_State *L) {
 
 	// 加载纹理数据
 	glPixelStorei(GL_UNPACK_ALIGNMENT, 4); // 确保 4 字节对齐
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, image->width, image->height, 0, GL_RGBA, GL_UNSIGNED_BYTE, image->data);
+	glTexImage2D(GL_TEXTURE_2D, 0, format, image->width, image->height, 0, format, GL_UNSIGNED_BYTE, image->data);
 
 	glBindTexture(GL_TEXTURE_2D, 0);
 
-	texture_t *texture_data = lua_newuserdata(L, sizeof(texture_t));
+	texture2d_t *texture_data = lua_newuserdata(L, sizeof(texture2d_t));
 	luaL_setmetatable(L, FLN_USERTYPE_TEXTURE2D);
 	texture_data->id = texture;
 	texture_data->width = image->width;
@@ -487,8 +494,15 @@ static int l_texture2d(lua_State *L) {
 	return 1;
 }
 
+static int l_texture2d_size(lua_State *L) {
+	texture2d_t *texture = luaL_checkudata(L, 1, FLN_USERTYPE_TEXTURE2D);
+	lua_pushinteger(L, texture->width);
+	lua_pushinteger(L, texture->height);
+	return 2;
+}
+
 static int l_texture2d_release(lua_State *L) {
-	texture_t *texture = luaL_checkudata(L, 1, FLN_USERTYPE_TEXTURE2D);
+	texture2d_t *texture = luaL_checkudata(L, 1, FLN_USERTYPE_TEXTURE2D);
 	if (texture->id) {
 		glDeleteTextures(1, &texture->id);
 		texture->id = 0;
@@ -504,7 +518,7 @@ static SDL_WindowFlags sdl_configure(fln_app_state_t *appstate) {
 	return SDL_WINDOW_OPENGL;
 }
 
-static bool init_resource(fln_app_state_t *appstate) {
+static bool init(fln_app_state_t *appstate) {
 	appstate->ogl_context = SDL_GL_CreateContext(appstate->window);
 	if (!appstate->ogl_context) {
 		printf("failed to call SDL_GL_CreateContext()\n");
@@ -555,7 +569,7 @@ static void receive_window_events(fln_app_state_t *appstate, const SDL_Event *ev
 fln_gfx_backend_t fln_gfx_init_backend_ogl() {
 	fln_gfx_backend_t backend;
 	backend.sdl_configure = sdl_configure;
-	backend.init_resource = init_resource;
+	backend.init = init;
 	backend.begin_drawing = begin_drawing;
 	backend.end_drawing = end_drawing;
 	backend.destroy_resource = destroy_resource;
@@ -568,6 +582,7 @@ fln_gfx_backend_t fln_gfx_init_backend_ogl() {
 	backend.l_mesh = l_mesh;
 	backend.l_mesh_release = l_m_mesh_release;
 	backend.l_texture2d = l_texture2d;
+	backend.l_texture2d_size = l_texture2d_size;
 	backend.l_texture2d_release = l_texture2d_release;
 	return backend;
 }

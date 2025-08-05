@@ -59,7 +59,7 @@ static void iterate_layer(lua_State *L, entities_layer_t layer, const char *func
 				// 如果出现问题，将该对象的 `act` 改为不活跃，以避免重复执行出错的函数
 				lua_pushboolean(L, false);
 				lua_setfield(L, 2, "act");
-				printf("(in runtime) (%s|error code: %d) %s\n", func_name, code, lua_tostring(L, -1));
+				printf("(in script) (%s|code: %d) %s\n", func_name, code, lua_tostring(L, -1));
 			}
 		}
 		lua_settop(L, 2);

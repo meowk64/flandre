@@ -19,7 +19,7 @@
 
 typedef struct fln_gfx_backend_s {
 	SDL_WindowFlags (*sdl_configure)(fln_app_state_t *appstate);
-	bool (*init_resource)(fln_app_state_t *appstate);
+	bool (*init)(fln_app_state_t *appstate);
 	bool (*begin_drawing)(fln_app_state_t *appstate);
 	bool (*end_drawing)(fln_app_state_t *appstate);
 	bool (*destroy_resource)(fln_app_state_t *appstate);
@@ -32,5 +32,6 @@ typedef struct fln_gfx_backend_s {
 	lua_CFunction l_mesh;
 	lua_CFunction l_mesh_release;
 	lua_CFunction l_texture2d;
+	lua_CFunction l_texture2d_size;
 	lua_CFunction l_texture2d_release;
 } fln_gfx_backend_t;
