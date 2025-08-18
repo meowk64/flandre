@@ -319,7 +319,7 @@ static int l_m_pipeline_uniform(lua_State *L) {
 		void *texture2d_test = luaL_testudata(L, 3, FLN_USERTYPE_TEXTURE2D);
 		void *transform_test = luaL_testudata(L, 3, FLN_USERTYPE_TRANSFORM);
 		if (transform_test) {
-			mat4s **transform = (mat4s **)transform_test;
+			mat4 **transform = (mat4 **)transform_test;
 
 			if (transform && *transform) {
 				// glms_mat4_print(*transform, stdout);

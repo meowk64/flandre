@@ -7,11 +7,11 @@
 */
 #pragma once
 
-#include <SDL3/SDL_video.h>
+#include <SDL3/SDL_events.h>
 #include <lua.h>
 
-bool fln_iterate_entites(lua_State *L);
+void fln_iterate(lua_State *);
 
-bool fln_draw_entities(lua_State *L);
+void fln_draw(lua_State *);
 
-int fln_luaopen_entity(lua_State *L);
+int fln_luaopen_callback(lua_State *);

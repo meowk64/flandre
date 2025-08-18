@@ -5,6 +5,7 @@
 	Flandre is free software: you can redistribute it and/or modify
 	it under the terms of the MIT License.  See `LICENSE` for more details
 */
+#include "callback.h"
 #include <cglm/cglm.h>
 #include <cglm/mat4.h>
 #include <cglm/types.h>
@@ -17,7 +18,6 @@
 #include <lualib.h>
 
 #include "appstate.h"
-#include "entity.h"
 #include "flandre.h"
 #include "graphics.h"
 #include "keyboard.h"
@@ -56,8 +56,8 @@ int SDL_AppInit(void **appstate_, int argc, char *argv[]) {
 	if (!fln_gfx_init(appstate)) {
 		return SDL_APP_FAILURE;
 	}
-	if (luaL_dofile(appstate->L, "main.lua")) {
-		printf("(in script) (main) %s\n", lua_tostring(appstate->L, -1));
+	if (luaL_dofile(appstate->L, "root.lua")) {
+		printf("(in script) (root) %s\n", lua_tostring(appstate->L, -1));
 	}
 	return SDL_APP_CONTINUE;
 }
@@ -68,13 +68,9 @@ int SDL_AppIterate(void *appstate_) {
 		return SDL_APP_SUCCESS;
 	}
 	// uint64_t frame_start = SDL_GetTicks();
-	if (!fln_iterate_entites(appstate->L)) {
-		return SDL_APP_FAILURE;
-	}
+	fln_iterate(appstate->L);
 	fln_gfx_begin_drawing(appstate);
-	if (!fln_draw_entities(appstate->L)) {
-		return SDL_APP_FAILURE;
-	}
+	fln_draw(appstate->L);
 	fln_gfx_end_drawing(appstate);
 	/*
 	uint64_t frame_time = SDL_GetTicks() - frame_start;

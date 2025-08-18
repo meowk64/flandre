@@ -7,7 +7,7 @@
 */
 #include "flandre.h"
 #include "data.h"
-#include "entity.h"
+#include "callback.h"
 #include "graphics.h"
 #include "keyboard.h"
 #include "math.h"
@@ -32,9 +32,9 @@ int fln_luaopen(lua_State *L) {
 	lua_call(L, 0, 1);
 	lua_setfield(L, 1, "data");
 
-	lua_pushcfunction(L, fln_luaopen_entity);
+	lua_pushcfunction(L, fln_luaopen_callback);
 	lua_call(L, 0, 1);
-	lua_setfield(L, 1, "entity");
+	lua_setfield(L, 1, "callback");
 
 	lua_pushcfunction(L, fln_luaopen_math);
 	lua_call(L, 0, 1);
