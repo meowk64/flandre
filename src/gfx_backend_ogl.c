@@ -472,17 +472,23 @@ static int l_texture2d(lua_State *L) {
 	glGenTextures(1, &texture);
 	glBindTexture(GL_TEXTURE_2D, texture);
 
-	// 设置纹理参数
 	// 以后也能自定义参数？
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-	// 加载纹理数据
-	glPixelStorei(GL_UNPACK_ALIGNMENT, 4); // 确保 4 字节对齐
+	if (image->width % 4 != 0) {
+		if (image->width % 2 != 0) {
+			glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+		} else {
+			glPixelStorei(GL_UNPACK_ALIGNMENT, 2);
+		}
+	} else {
+		glPixelStorei(GL_UNPACK_ALIGNMENT, 4);
+	}
 	glTexImage2D(GL_TEXTURE_2D, 0, format, image->width, image->height, 0, format, GL_UNSIGNED_BYTE, image->data);
-
+	glPixelStorei(GL_UNPACK_ALIGNMENT, 4);
 	glBindTexture(GL_TEXTURE_2D, 0);
 
 	texture2d_t *texture_data = lua_newuserdata(L, sizeof(texture2d_t));
