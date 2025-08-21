@@ -14,4 +14,6 @@ void fln_iterate(lua_State *);
 
 void fln_draw(lua_State *);
 
+void fln_exit(lua_State *L);
+
 int fln_luaopen_callback(lua_State *);

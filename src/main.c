@@ -95,6 +95,7 @@ int SDL_AppEvent(void *appstate_, const SDL_Event *event) {
 
 void SDL_AppQuit(void *appstate_) {
 	fln_app_state_t *appstate = (fln_app_state_t *)appstate_;
+	fln_exit(appstate->L);
 	lua_close(appstate->L);
 	// lua虚拟机一定要最先关闭，否则一些资源会丢失上下文（例如OpenGL资源会在上下文已经释放过后再释放）
 	fln_gfx_destroy_resource(appstate);

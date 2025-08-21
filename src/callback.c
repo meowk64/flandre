@@ -3,7 +3,8 @@
 #include <lua.h>
 
 static int KEY_ITERATE_FUNC = 0x0d000721;
-static int KEY_DRAW_FUNC = 0x0009961;
+static int KEY_DRAW_FUNC = 0x9961;
+static int KEY_EXIT_FUNC = 0x45451919;
 //static int KEY_EVENT_FUNC = 0x0004545;
 
 static int l_placeholder(lua_State *L) {
@@ -21,6 +22,13 @@ static int l_draw(lua_State *L) {
 	lua_settop(L, 1);
 	luaL_checktype(L, 1, LUA_TFUNCTION);
 	lua_rawsetp(L, LUA_REGISTRYINDEX, &KEY_DRAW_FUNC);
+	return 0;
+}
+
+static int l_exit(lua_State *L) {
+	lua_settop(L, 1);
+	luaL_checktype(L, 1, LUA_TFUNCTION);
+	lua_rawsetp(L, LUA_REGISTRYINDEX, &KEY_EXIT_FUNC);
 	return 0;
 }
 
@@ -51,14 +59,26 @@ void fln_draw(lua_State *L) {
 	}
 }
 
+void fln_exit(lua_State *L) {
+	lua_rawgetp(L, LUA_REGISTRYINDEX, &KEY_EXIT_FUNC);
+	if (lua_pcall(L, 0, 0, 0) != LUA_OK) {
+		printf("(in exit callback) lua: %s\n", lua_tostring(L, -1));
+		lua_pushcfunction(L, l_placeholder);
+		lua_rawsetp(L, LUA_REGISTRYINDEX, &KEY_EXIT_FUNC);
+	}
+}
+
 int fln_luaopen_callback(lua_State *L) {
     lua_pushcfunction(L, l_placeholder);
     lua_pushvalue(L, -1);
+	lua_pushvalue(L, -1);
     lua_rawsetp(L, LUA_REGISTRYINDEX, &KEY_ITERATE_FUNC);
     lua_rawsetp(L, LUA_REGISTRYINDEX, &KEY_DRAW_FUNC);
+	lua_rawsetp(L, LUA_REGISTRYINDEX, &KEY_EXIT_FUNC);
 	const luaL_Reg funcs[] = {
 		{ "iterate", l_iterate },
 		{ "draw", l_draw },
+		{"exit", l_exit},
 		{ nullptr, nullptr }
 	};
 	luaL_newlib(L, funcs);
