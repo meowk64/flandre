@@ -14,7 +14,7 @@
 #include "error.h"
 #include "memory.h"
 
-static int l_transform(lua_State *L) {
+static int lransform(lua_State *L) {
 	mat4 **transform = lua_newuserdata(L, sizeof(mat4*));
 	*transform = fln_alloc(sizeof(mat4));
 	luaL_setmetatable(L, FLN_USERTYPE_TRANSFORM);
@@ -22,7 +22,7 @@ static int l_transform(lua_State *L) {
 	return 1;
 }
 
-static int l_m_transform_translate(lua_State *L) {
+static int l_mransformranslate(lua_State *L) {
 	mat4 **transform = luaL_checkudata(L, 1, FLN_USERTYPE_TRANSFORM);
 	if (transform && *transform) {
 		float x = luaL_checknumber(L, 2);
@@ -35,7 +35,7 @@ static int l_m_transform_translate(lua_State *L) {
 	return 0;
 }
 
-static int l_m_transform_rotate(lua_State *L) {
+static int l_mransform_rotate(lua_State *L) {
 	mat4 **transform = luaL_checkudata(L, 1, FLN_USERTYPE_TRANSFORM);
 	if (transform && *transform) {
 		float angle = luaL_checknumber(L, 2);
@@ -49,7 +49,7 @@ static int l_m_transform_rotate(lua_State *L) {
 	return 0;
 }
 
-static int l_m_transform_rotate_at(lua_State *L) {
+static int l_mransform_rotate_at(lua_State *L) {
 	mat4 **transform = luaL_checkudata(L, 1, FLN_USERTYPE_TRANSFORM);
 	if (transform && *transform) {
 		float angle = luaL_checknumber(L, 2);
@@ -66,7 +66,7 @@ static int l_m_transform_rotate_at(lua_State *L) {
 	return 0;
 }
 
-static int l_m_transform_spin(lua_State *L) {
+static int l_mransform_spin(lua_State *L) {
 	mat4 **transform = luaL_checkudata(L, 1, FLN_USERTYPE_TRANSFORM);
 	if (transform && *transform) {
 		float angle = luaL_checknumber(L, 2);
@@ -80,7 +80,7 @@ static int l_m_transform_spin(lua_State *L) {
 	return 0;
 }
 
-static int l_m_transform_scale(lua_State *L) {
+static int l_mransform_scale(lua_State *L) {
 	mat4 **transform = luaL_checkudata(L, 1, FLN_USERTYPE_TRANSFORM);
 	if (transform && *transform) {
 		float x = luaL_checknumber(L, 2);
@@ -93,7 +93,7 @@ static int l_m_transform_scale(lua_State *L) {
 	return 0;
 }
 
-static int l_m_transform_identity(lua_State *L) {
+static int l_mransform_identity(lua_State *L) {
 	mat4 **transform = luaL_checkudata(L, 1, FLN_USERTYPE_TRANSFORM);
 	if (transform && *transform) {
 		glm_mat4_identity(**transform);
@@ -103,7 +103,7 @@ static int l_m_transform_identity(lua_State *L) {
 	return 0;
 }
 
-static int l_m_transform_zero(lua_State *L) {
+static int l_mransform_zero(lua_State *L) {
 	mat4 **transform = luaL_checkudata(L, 1, FLN_USERTYPE_TRANSFORM);
 	if (transform && *transform) {
 		glm_mat4_zero(**transform);
@@ -113,7 +113,7 @@ static int l_m_transform_zero(lua_State *L) {
 	return 0;
 }
 
-static int l_m_transform_ortho(lua_State *L) {
+static int l_mransform_ortho(lua_State *L) {
 	mat4 **transform = luaL_checkudata(L, 1, FLN_USERTYPE_TRANSFORM);
 	if (transform && *transform) {
 		float left = luaL_checknumber(L, 2);
@@ -129,7 +129,7 @@ static int l_m_transform_ortho(lua_State *L) {
 	return 0;
 }
 
-static int l_m_transform_perspective(lua_State *L) {
+static int l_mransform_perspective(lua_State *L) {
 	mat4 **transform = luaL_checkudata(L, 1, FLN_USERTYPE_TRANSFORM);
 	if (transform && *transform) {
 		float fov = luaL_checknumber(L, 2);
@@ -143,7 +143,7 @@ static int l_m_transform_perspective(lua_State *L) {
 	return 0;
 }
 
-static int l_m_transform_lookat(lua_State *L) {
+static int l_mransform_lookat(lua_State *L) {
 	mat4 **transform = luaL_checkudata(L, 1, FLN_USERTYPE_TRANSFORM);
 	if (transform && *transform) {
 		float eye_x = luaL_checknumber(L, 2);
@@ -162,7 +162,7 @@ static int l_m_transform_lookat(lua_State *L) {
 	return 0;
 }
 
-static int l_m_transform_multiply(lua_State *L) {
+static int l_mransform_multiply(lua_State *L) {
 	mat4 **transform = luaL_checkudata(L, 1, FLN_USERTYPE_TRANSFORM);
 	if (transform && *transform) {
 		mat4 **other = luaL_checkudata(L, 2, FLN_USERTYPE_TRANSFORM);
@@ -177,7 +177,7 @@ static int l_m_transform_multiply(lua_State *L) {
 	return 0;
 }
 
-static int l_m_transform_release(lua_State *L) {
+static int l_mransform_release(lua_State *L) {
 	mat4 **transform = luaL_checkudata(L, 1, FLN_USERTYPE_TRANSFORM);
 	if (transform && *transform) {
 		fln_free((void *)*transform);
@@ -187,29 +187,29 @@ static int l_m_transform_release(lua_State *L) {
 }
 
 int fln_luaopen_math(lua_State *L) {
-	const luaL_Reg meths_transform[] = {
-		{ "translate", l_m_transform_translate },
-		{ "rotate", l_m_transform_rotate },
-		{ "rotate_at", l_m_transform_rotate_at },
-		{ "spin", l_m_transform_spin },
-		{ "scale", l_m_transform_scale },
-		{ "identity", l_m_transform_identity },
-		{ "zero", l_m_transform_zero },
-		{ "ortho", l_m_transform_ortho },
-		{ "perspective", l_m_transform_perspective },
-		{ "lookat", l_m_transform_lookat },
-		{ "multiply", l_m_transform_multiply },
-		{ "__mul", l_m_transform_multiply },
-		{ "release", l_m_transform_release },
-		{ "__gc", l_m_transform_release },
+	const luaL_Reg methsransform[] = {
+		{ "translate", l_mransformranslate },
+		{ "rotate", l_mransform_rotate },
+		{ "rotate_at", l_mransform_rotate_at },
+		{ "spin", l_mransform_spin },
+		{ "scale", l_mransform_scale },
+		{ "identity", l_mransform_identity },
+		{ "zero", l_mransform_zero },
+		{ "ortho", l_mransform_ortho },
+		{ "perspective", l_mransform_perspective },
+		{ "lookat", l_mransform_lookat },
+		{ "multiply", l_mransform_multiply },
+		{ "__mul", l_mransform_multiply },
+		{ "release", l_mransform_release },
+		{ "__gc", l_mransform_release },
 		{ nullptr, nullptr }
 	};
 	luaL_newmetatable(L, FLN_USERTYPE_TRANSFORM);
 	lua_pushvalue(L, -1);
 	lua_setfield(L, -2, "__index");
-	luaL_setfuncs(L, meths_transform, 0);
+	luaL_setfuncs(L, methsransform, 0);
 	const luaL_Reg func[] = {
-		{ "transform", l_transform },
+		{ "transform", lransform },
 		{ nullptr, nullptr },
 	};
 	luaL_newlib(L, func);

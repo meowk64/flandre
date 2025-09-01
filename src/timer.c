@@ -27,7 +27,7 @@ static int l_counter(lua_State *L) {
 	return 1;
 }
 
-int fln_luaopen_timer(lua_State *L) {
+int fln_luaopenimer(lua_State *L) {
 	const luaL_Reg funcs[] = {
 		{ "milliseconds", l_milliseconds },
 		{ "nanoseconds", l_nanoseconds },

@@ -9,4 +9,4 @@
 
 #include "gfx_interface.h"
 
-fln_gfx_backend_t fln_gfx_init_backend_ogl();
+fln_gfx_backend fln_gfx_init_backend_ogl();

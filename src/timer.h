@@ -9,4 +9,4 @@
 
 #include <lua.h>
 
-int fln_luaopen_timer(lua_State *L);
+int fln_luaopenimer(lua_State *L);

@@ -15,9 +15,9 @@
 #include "gfx_interface.h"
 #include "opengl/glad.h"
 
-static fln_gfx_backend_t backend;
+static fln_gfx_backend backend;
 
-SDL_WindowFlags fln_gfx_sdl_configure(fln_app_state_t *appstate) {
+SDL_WindowFlags fln_gfx_sdl_configure(fln_app_state *appstate) {
 	if (backend.sdl_configure) {
 		return backend.sdl_configure(appstate);
 	} else {
@@ -26,7 +26,7 @@ SDL_WindowFlags fln_gfx_sdl_configure(fln_app_state_t *appstate) {
 	}
 }
 
-bool fln_gfx_init(fln_app_state_t *appstate) {
+bool fln_gfx_init(fln_app_state *appstate) {
 	if (backend.init) {
 		return backend.init(appstate);
 	} else {
@@ -35,7 +35,7 @@ bool fln_gfx_init(fln_app_state_t *appstate) {
 	}
 }
 
-void fln_gfx_begin_drawing(fln_app_state_t *appstate) {
+void fln_gfx_begin_drawing(fln_app_state *appstate) {
 	if (backend.begin_drawing) {
 		backend.begin_drawing(appstate);
 	} else {
@@ -43,7 +43,7 @@ void fln_gfx_begin_drawing(fln_app_state_t *appstate) {
 	}
 }
 
-void fln_gfx_end_drawing(fln_app_state_t *appstate) {
+void fln_gfx_end_drawing(fln_app_state *appstate) {
 	if (backend.end_drawing) {
 		backend.end_drawing(appstate);
 	} else {
@@ -51,7 +51,7 @@ void fln_gfx_end_drawing(fln_app_state_t *appstate) {
 	}
 }
 
-void fln_gfx_destroy_resource(fln_app_state_t *appstate) {
+void fln_gfx_destroy_resource(fln_app_state *appstate) {
 	if (backend.destroy_resource) {
 		backend.destroy_resource(appstate);
 	} else {
@@ -59,7 +59,7 @@ void fln_gfx_destroy_resource(fln_app_state_t *appstate) {
 	}
 }
 
-void fln_gfx_receive_window_events(fln_app_state_t *appstate, const SDL_Event *event) {
+void fln_gfx_receive_window_events(fln_app_state *appstate, const SDL_Event *event) {
 	if (backend.receive_window_events) {
 		backend.receive_window_events(appstate, event);
 	} else {
@@ -77,7 +77,7 @@ int fln_luaopen_graphics(lua_State *L) {
 		{ "submit", backend.l_pipeline_submit },
 		{ "submit_instanced", backend.l_pipeline_submit_instanced },
 		{ "release", backend.l_pipeline_release },
-		//{"texture", backend.l_pipeline_texture},
+		//{"texture", backend.l_pipelineexture},
 		{ "__gc", backend.l_pipeline_release },
 		{ nullptr, nullptr } };
 	const luaL_Reg meths_mesh[] = {
@@ -85,7 +85,7 @@ int fln_luaopen_graphics(lua_State *L) {
 		{ "__gc", backend.l_mesh_release },
 		{ nullptr, nullptr }
 	};
-	const luaL_Reg meths_texture[] = {
+	const luaL_Reg methsexture[] = {
 		{ "size", backend.l_texture2d_size },
 		{ "release", backend.l_texture2d_release },
 		{ "__gc", backend.l_texture2d_release },
@@ -100,7 +100,7 @@ int fln_luaopen_graphics(lua_State *L) {
 	luaL_newmetatable(L, FLN_USERTYPE_TEXTURE2D);
 	lua_pushvalue(L, -1);
 	lua_setfield(L, -2, "__index");
-	luaL_setfuncs(L, meths_texture, 0);
+	luaL_setfuncs(L, methsexture, 0);
 
 	luaL_newmetatable(L, FLN_USERTYPE_MESH);
 	lua_pushvalue(L, -1);

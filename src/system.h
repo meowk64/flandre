@@ -11,8 +11,8 @@
 #include <SDL3/SDL_video.h>
 #include <lua.h>
 
-void fln_system_init(fln_app_state_t *);
+void fln_system_init(fln_app_state *);
 
-bool fln_should_terminte();
+bool fln_shoulderminte();
 
 int fln_luaopen_system(lua_State *L);

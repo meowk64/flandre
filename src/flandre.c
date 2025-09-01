@@ -24,7 +24,7 @@ int fln_luaopen(lua_State *L) {
 	lua_call(L, 0, 1);
 	lua_setfield(L, 1, "system");
 
-	lua_pushcfunction(L, fln_luaopen_timer);
+	lua_pushcfunction(L, fln_luaopenimer);
 	lua_call(L, 0, 1);
 	lua_setfield(L, 1, "timer");
 

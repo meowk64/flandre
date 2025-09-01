@@ -10,8 +10,8 @@
 #include <SDL3/SDL_video.h>
 #include <lua.h>
 
-typedef struct fln_app_state_s {
+typedef struct fln_app_state {
 	lua_State *L;
 	SDL_Window *window;
 	SDL_GLContext ogl_context;
-} fln_app_state_t;
+} fln_app_state;

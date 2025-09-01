@@ -17,14 +17,14 @@
 
 int fln_luaopen_graphics(lua_State *L);
 
-SDL_WindowFlags fln_gfx_sdl_configure(fln_app_state_t *appstate);
+SDL_WindowFlags fln_gfx_sdl_configure(fln_app_state *appstate);
 
-bool fln_gfx_init(fln_app_state_t *appstate);
+bool fln_gfx_init(fln_app_state *appstate);
 
-void fln_gfx_begin_drawing(fln_app_state_t *appstate);
+void fln_gfx_begin_drawing(fln_app_state *appstate);
 
-void fln_gfx_end_drawing(fln_app_state_t *appstate);
+void fln_gfx_end_drawing(fln_app_state *appstate);
 
-void fln_gfx_destroy_resource(fln_app_state_t *appstate);
+void fln_gfx_destroy_resource(fln_app_state *appstate);
 
-void fln_gfx_receive_window_events(fln_app_state_t *appstate, const SDL_Event *event);
+void fln_gfx_receive_window_events(fln_app_state *appstate, const SDL_Event *event);

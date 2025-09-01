@@ -17,13 +17,13 @@
 #define FLN_USERTYPE_MESH "fln.mesh"
 #define FLN_USERTYPE_TEXTURE2D "fln.texture2d"
 
-typedef struct fln_gfx_backend_s {
-	SDL_WindowFlags (*sdl_configure)(fln_app_state_t *appstate);
-	bool (*init)(fln_app_state_t *appstate);
-	bool (*begin_drawing)(fln_app_state_t *appstate);
-	bool (*end_drawing)(fln_app_state_t *appstate);
-	bool (*destroy_resource)(fln_app_state_t *appstate);
-	void (*receive_window_events)(fln_app_state_t *appstate, const SDL_Event *event);
+typedef struct fln_gfx_backend {
+	SDL_WindowFlags (*sdl_configure)(fln_app_state *appstate);
+	bool (*init)(fln_app_state *appstate);
+	bool (*begin_drawing)(fln_app_state *appstate);
+	bool (*end_drawing)(fln_app_state *appstate);
+	bool (*destroy_resource)(fln_app_state *appstate);
+	void (*receive_window_events)(fln_app_state *appstate, const SDL_Event *event);
 	lua_CFunction l_pipeline;
 	lua_CFunction l_pipeline_release;
 	lua_CFunction l_pipeline_uniform;
@@ -34,4 +34,4 @@ typedef struct fln_gfx_backend_s {
 	lua_CFunction l_texture2d;
 	lua_CFunction l_texture2d_size;
 	lua_CFunction l_texture2d_release;
-} fln_gfx_backend_t;
+} fln_gfx_backend;

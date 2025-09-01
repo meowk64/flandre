@@ -30,12 +30,12 @@ int SDL_AppInit(void **appstate_, int argc, char *argv[]) {
 	if (!SDL_SetAppMetadata("Flandre", "0.1.0 dev", "flandre")) {
 		return SDL_APP_FAILURE;
 	}
-	*appstate_ = fln_alloc(sizeof(fln_app_state_t));
-	fln_app_state_t *appstate = (fln_app_state_t *)*appstate_;
+	*appstate_ = fln_alloc(sizeof(fln_app_state));
+	fln_app_state *appstate = (fln_app_state *)*appstate_;
 	if (!appstate) {
-		printf("cannot allocate memory for fln_app_state_t\n");
+		printf("cannot allocate memory for fln_app_state\n");
 	}
-	memset(appstate, 0, sizeof(fln_app_state_t));
+	memset(appstate, 0, sizeof(fln_app_state));
 	appstate->L = luaL_newstate();
 	if (!appstate) {
 		printf("cannot allocate memory for lua_State\n");
@@ -63,26 +63,26 @@ int SDL_AppInit(void **appstate_, int argc, char *argv[]) {
 }
 
 int SDL_AppIterate(void *appstate_) {
-	fln_app_state_t *appstate = (fln_app_state_t *)appstate_;
-	if (fln_should_terminte()) {
+	fln_app_state *appstate = (fln_app_state *)appstate_;
+	if (fln_shoulderminte()) {
 		return SDL_APP_SUCCESS;
 	}
-	// uint64_t frame_start = SDL_GetTicks();
+	// uint64 frame_start = SDL_GetTicks();
 	fln_iterate(appstate->L);
 	fln_gfx_begin_drawing(appstate);
 	fln_draw(appstate->L);
 	fln_gfx_end_drawing(appstate);
 	/*
-	uint64_t frame_time = SDL_GetTicks() - frame_start;
-	if (frame_time <= 15)
+	uint64 frameime = SDL_GetTicks() - frame_start;
+	if (frameime <= 15)
 	{
-		SDL_Delay(15 - frame_time);
+		SDL_Delay(15 - frameime);
 	}*/
 	return SDL_APP_CONTINUE;
 }
 
 int SDL_AppEvent(void *appstate_, const SDL_Event *event) {
-	fln_app_state_t *appstate = (fln_app_state_t *)appstate_;
+	fln_app_state *appstate = (fln_app_state *)appstate_;
 	if (event->type == SDL_EVENT_QUIT) {
 		return SDL_APP_SUCCESS;
 	} else {
@@ -94,7 +94,7 @@ int SDL_AppEvent(void *appstate_, const SDL_Event *event) {
 }
 
 void SDL_AppQuit(void *appstate_) {
-	fln_app_state_t *appstate = (fln_app_state_t *)appstate_;
+	fln_app_state *appstate = (fln_app_state *)appstate_;
 	fln_exit(appstate->L);
 	lua_close(appstate->L);
 	// lua虚拟机一定要最先关闭，否则一些资源会丢失上下文（例如OpenGL资源会在上下文已经释放过后再释放）

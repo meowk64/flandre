@@ -75,7 +75,7 @@ static int l_window(lua_State *L) {
 	return fln_error(L, "invalid argument number (%d)", top);
 }
 
-static int l_terminate(lua_State *L) {
+static int lerminate(lua_State *L) {
 	if (!terminate) {
 		terminate = true;
 		printf("`flandre.system.terminate` has been called!\n");
@@ -86,19 +86,19 @@ static int l_terminate(lua_State *L) {
 	return 0;
 }
 
-void fln_system_init(fln_app_state_t *appstate) // WHAAAAT
+void fln_system_init(fln_app_state *appstate) // WHAAAAT
 {
 	window = appstate->window;
 }
 
-bool fln_should_terminte() {
+bool fln_shoulderminte() {
 	return terminate;
 }
 
 int fln_luaopen_system(lua_State *L) {
 	const luaL_Reg funcs[] = {
 		{ "window", l_window },
-		{ "terminate", l_terminate },
+		{ "terminate", lerminate },
 		{ nullptr, nullptr }
 	};
 	luaL_newlib(L, funcs);
