@@ -7,8 +7,11 @@
 */
 #pragma once
 
+extern "C" {
 #include <lauxlib.h>
 #include <lua.h>
+}
+
 #include <stddef.h>
 #include <ft2build.h>
 #include FT_FREETYPE_H
@@ -18,23 +21,23 @@
 #define FLN_USERTYPE_MODEL "fln.model" // TODO
 #define FLN_USERTYPE_FONT "fln.font"
 
-typedef enum fln_image_format {
+enum fln_image_format {
 	FLN_IMAGE_FORMAT_R8,
 	FLN_IMAGE_FORMAT_RG8,
 	FLN_IMAGE_FORMAT_RGB8,
 	FLN_IMAGE_FORMAT_RGBA8,
-} fln_image_format;
+} ;
 
-typedef struct fln_image {
+struct fln_image {
 	int width;
 	int height;
 	fln_image_format format;
 	unsigned char *data;
-} fln_image;
+};
 
-typedef struct fln_font {
+struct fln_font {
 	FT_Library context;
 	FT_Face face;
-} fln_font;
+};
 
 int fln_luaopen_data(lua_State *L);

@@ -8,7 +8,11 @@
 #pragma once
 
 #include <SDL3/SDL_events.h>
+
+extern "C" {
 #include <lua.h>
+}
+
 
 void fln_iterate(lua_State *);
 

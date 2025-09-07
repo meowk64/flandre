@@ -29,4 +29,3 @@ void *fln_realloc(void *ptr, size_t size) {
 void fln_free(void *ptr) {
 	free(ptr);
 }
-

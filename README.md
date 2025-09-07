@@ -4,7 +4,7 @@ _Sorry, this page does not currently have an English version._
 
 该项目仍在开发中
 
-`flandre` 是一个用于开发小型 2D/3D 游戏的框架，使用 C23 编写。
+`flandre` 是一个用于开发小型 2D/3D 游戏的框架，使用 C++20 编写，但是使用 C 风格。
 
 项目主要使用 C 作为源代码，Lua 作为脚本代码，但是不像游戏引擎那样封装大量内容，`flandre` 只是把一些最基础的功能给到 Lua 层，所以大部分工作都在 Lua 层进行。
 

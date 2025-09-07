@@ -9,19 +9,18 @@
 #include <cglm/cglm.h>
 #include <cglm/mat4.h>
 #include <cglm/types.h>
-#include <string.h>
 #define SDL_MAIN_USE_CALLBACKS 1
 #include <SDL3/SDL.h>
 #include <SDL3/SDL_main.h>
+extern "C" {
 #include <lauxlib.h>
 #include <lua.h>
 #include <lualib.h>
-
+}
 #include "appstate.h"
 #include "flandre.h"
 #include "graphics.h"
 #include "keyboard.h"
-#include "memory.h"
 #include "mouse.h"
 #include "opengl/glad.h"
 #include "system.h"
@@ -30,12 +29,11 @@ int SDL_AppInit(void **appstate_, int argc, char *argv[]) {
 	if (!SDL_SetAppMetadata("Flandre", "0.1.0 dev", "flandre")) {
 		return SDL_APP_FAILURE;
 	}
-	*appstate_ = fln_alloc(sizeof(fln_app_state));
+	*appstate_ = new fln_app_state;
 	fln_app_state *appstate = (fln_app_state *)*appstate_;
 	if (!appstate) {
 		printf("cannot allocate memory for fln_app_state\n");
 	}
-	memset(appstate, 0, sizeof(fln_app_state));
 	appstate->L = luaL_newstate();
 	if (!appstate) {
 		printf("cannot allocate memory for lua_State\n");
@@ -101,5 +99,5 @@ void SDL_AppQuit(void *appstate_) {
 	fln_gfx_destroy_resource(appstate);
 	fln_clear_key_states();
 	SDL_DestroyWindow(appstate->window);
-	fln_free(appstate);
+	delete appstate;
 }

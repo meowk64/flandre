@@ -7,7 +7,10 @@
 */
 #pragma once
 #include <SDL3/SDL_events.h>
+
+extern "C" {
 #include <lua.h>
+}
 
 void fln_receive_keyboard_events(const SDL_Event *event);
 

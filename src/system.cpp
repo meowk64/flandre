@@ -9,8 +9,10 @@
 
 #include "error.h"
 #include <SDL3/SDL_video.h>
+extern "C" {
 #include <lauxlib.h>
 #include <lua.h>
+}
 
 static SDL_Window *window;
 

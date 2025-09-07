@@ -13,13 +13,11 @@
 #include <lauxlib.h>
 #include <uthash.h>
 
-#include "memory.h"
-
-typedef struct key_state_entry_s {
+struct key_state_entry {
 	int key;
 	bool state;
 	UT_hash_handle hh;
-} key_state_entry;
+};
 
 static key_state_entry *key_states = nullptr;
 
@@ -42,7 +40,7 @@ void fln_receive_keyboard_events(const SDL_Event *event) {
 		if (entry) {
 			entry->state = is_down;
 		} else {
-			entry = fln_alloc(sizeof(key_state_entry));
+			entry = new key_state_entry;
 			if (entry) {
 				entry->key = key;
 				entry->state = is_down;
@@ -56,7 +54,7 @@ void fln_clear_key_states() {
 	key_state_entry *entry, *tmp;
 	HASH_ITER(hh, key_states, entry, tmp) {
 		HASH_DEL(key_states, entry);
-		fln_free(entry);
+		delete entry;
 	}
 }
 

@@ -7,6 +7,8 @@
 */
 #pragma once
 
+extern "C" {
 #include <lua.h>
+}
 
 int fln_luaopen(lua_State *);

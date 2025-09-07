@@ -9,7 +9,9 @@
 
 #include "appstate.h"
 #include <SDL3/SDL_video.h>
+extern "C" {
 #include <lua.h>
+}
 
 void fln_system_init(fln_app_state *);
 

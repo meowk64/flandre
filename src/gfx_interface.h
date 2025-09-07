@@ -9,7 +9,10 @@
 
 #include <SDL3/SDL_events.h>
 #include <SDL3/SDL_video.h>
+extern "C" {
 #include <lua.h>
+}
+
 
 #include "appstate.h"
 
@@ -17,7 +20,7 @@
 #define FLN_USERTYPE_MESH "fln.mesh"
 #define FLN_USERTYPE_TEXTURE2D "fln.texture2d"
 
-typedef struct fln_gfx_backend {
+struct fln_gfx_backend {
 	SDL_WindowFlags (*sdl_configure)(fln_app_state *appstate);
 	bool (*init)(fln_app_state *appstate);
 	bool (*begin_drawing)(fln_app_state *appstate);
@@ -34,4 +37,4 @@ typedef struct fln_gfx_backend {
 	lua_CFunction l_texture2d;
 	lua_CFunction l_texture2d_size;
 	lua_CFunction l_texture2d_release;
-} fln_gfx_backend;
+};

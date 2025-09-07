@@ -9,8 +9,12 @@
 
 #include <SDL3/SDL.h>
 #include <cglm/struct.h>
+
+extern "C" {
 #include <lauxlib.h>
 #include <lua.h>
+}
+
 #include <uthash.h>
 
 #include "data.h"
@@ -21,32 +25,32 @@
 #include "opengl/glad.h"
 
 // OpenGL 的 Uniform 缓存
-typedef struct gfx_uniform_cache_entry {
+struct gfx_uniform_cache_entry {
 	char name[64];
 	GLuint location;
 	UT_hash_handle hh;
-} gfx_uniform_cache_entry;
+};
 
 // OpenGL 的 Pipeline 实现
-typedef struct gfx_pipeline {
+struct gfx_pipeline {
 	GLuint shader_program;
 	gfx_uniform_cache_entry *uniform_cache;
-} gfx_pipeline;
+};
 
 // OpenGL 的 Mesh 实现
-typedef struct gfx_mesh {
+struct gfx_mesh {
 	GLuint vao;
 	GLuint vbo;
 	GLuint ebo;
 	unsigned int vertices_count;
-} gfx_mesh;
+};
 
 // OpenGL 的 Texture 实现
-typedef struct gfx_texture2d {
+struct gfx_texture2d {
 	GLuint id;
 	int width;
 	int height;
-} gfx_texture2d;
+};
 
 // tools ---------------------------------------------------------------------
 
@@ -56,7 +60,7 @@ static char *get_shader_log(GLuint sh) {
 	GLint len_written = 0;
 	glGetShaderiv(sh, GL_INFO_LOG_LENGTH, &len);
 	if (len > 0) {
-		char *log = fln_alloc(len);
+		char *log = reinterpret_cast<char *>(fln_alloc(len * sizeof(char)));
 		glGetShaderInfoLog(sh, len, &len_written, log);
 		return log;
 	}
@@ -76,7 +80,7 @@ static char *get_program_log(GLuint prog) {
 	GLint len_written = 0;
 	glGetProgramiv(prog, GL_INFO_LOG_LENGTH, &len);
 	if (len > 0) {
-		char *log = fln_alloc(len);
+		char *log = reinterpret_cast<char *>(fln_alloc(len * sizeof(char)));
 		glGetProgramInfoLog(prog, len, &len_written, log);
 		return log;
 	}
@@ -115,7 +119,7 @@ static GLuint get_uniform_location_cache(gfx_pipeline *pl, const char *name) {
 	} else {
 		GLuint location = glGetUniformLocation(pl->shader_program, name);
 		if (location != -1) {
-			entry = (gfx_uniform_cache_entry *)fln_alloc(sizeof(gfx_uniform_cache_entry));
+			entry = new gfx_uniform_cache_entry;
 			if (!entry) {
 				return -2; // 内存分配失败
 			}
@@ -133,7 +137,7 @@ static void clear_uniform_cache(gfx_pipeline *pl) {
 	gfx_uniform_cache_entry *entry, *tmp;
 	HASH_ITER(hh, pl->uniform_cache, entry, tmp) {
 		HASH_DEL(pl->uniform_cache, entry);
-		fln_free(entry);
+		delete entry;
 	}
 }
 
@@ -157,7 +161,7 @@ static int l_pipeline(lua_State *L) {
 	lua_settop(L, 1);
 	luaL_checktype(L, 1, LUA_TTABLE);
 
-	gfx_pipeline *pl = lua_newuserdata(L, sizeof(gfx_pipeline));
+	gfx_pipeline *pl = reinterpret_cast<gfx_pipeline *>(lua_newuserdata(L, sizeof(gfx_pipeline)));
 	luaL_setmetatable(L, FLN_USERTYPE_PIPELINE);
 
 	// shaders --------------------------------------------------------
@@ -224,7 +228,7 @@ static GLuint current_vao = 0;
 static int texture_unit_count = 0; // 用于记录纹理单元，以支持自动传入多个纹理
 
 static int l_m_pipeline_submit(lua_State *L) {
-	gfx_pipeline *pl = luaL_checkudata(L, 1, FLN_USERTYPE_PIPELINE);
+	gfx_pipeline *pl = reinterpret_cast<gfx_pipeline *>(luaL_checkudata(L, 1, FLN_USERTYPE_PIPELINE));
 	if (pl->shader_program == 0) {
 		return fln_error(L, "invalid pipeline");
 	}
@@ -234,7 +238,7 @@ static int l_m_pipeline_submit(lua_State *L) {
 		current_shader_program = pl->shader_program;
 	}
 
-	gfx_mesh *mesh = luaL_checkudata(L, 2, FLN_USERTYPE_MESH);
+	gfx_mesh *mesh = reinterpret_cast<gfx_mesh *>(luaL_checkudata(L, 2, FLN_USERTYPE_MESH));
 	if (mesh->vertices_count == 0 || mesh->ebo == 0 || mesh->vao == 0 || mesh->vbo == 0) {
 		return fln_error(L, "invalid mesh");
 	}
@@ -252,7 +256,7 @@ static int l_m_pipeline_submit(lua_State *L) {
 }
 
 static int l_m_pipeline_submit_instanced(lua_State *L) {
-	gfx_pipeline *pl = luaL_checkudata(L, 1, FLN_USERTYPE_PIPELINE);
+	gfx_pipeline *pl = reinterpret_cast<gfx_pipeline *>(luaL_checkudata(L, 1, FLN_USERTYPE_PIPELINE));
 	lua_Integer num = luaL_checkinteger(L, 2);
 	if (pl->shader_program == 0) {
 		return fln_error(L, "invalid pipeline");
@@ -263,7 +267,7 @@ static int l_m_pipeline_submit_instanced(lua_State *L) {
 		current_shader_program = pl->shader_program;
 	}
 
-	gfx_mesh *mesh = luaL_checkudata(L, 2, FLN_USERTYPE_MESH);
+	gfx_mesh *mesh = reinterpret_cast<gfx_mesh *>(luaL_checkudata(L, 2, FLN_USERTYPE_MESH));
 	if (mesh->vertices_count == 0 || mesh->ebo == 0 || mesh->vao == 0 || mesh->vbo == 0) {
 		return fln_error(L, "invalid mesh");
 	}
@@ -281,7 +285,7 @@ static int l_m_pipeline_submit_instanced(lua_State *L) {
 }
 
 static int l_m_pipeline_release(lua_State *L) {
-	gfx_pipeline *pl = luaL_checkudata(L, 1, FLN_USERTYPE_PIPELINE);
+	gfx_pipeline *pl = reinterpret_cast<gfx_pipeline *>(luaL_checkudata(L, 1, FLN_USERTYPE_PIPELINE));
 	if (pl->shader_program == 0) {
 		return 0;
 	}
@@ -300,7 +304,7 @@ static int l_m_pipeline_release(lua_State *L) {
 }
 
 static int l_m_pipeline_uniform(lua_State *L) {
-	gfx_pipeline *pl = luaL_checkudata(L, 1, FLN_USERTYPE_PIPELINE);
+	gfx_pipeline *pl = reinterpret_cast<gfx_pipeline *>(luaL_checkudata(L, 1, FLN_USERTYPE_PIPELINE));
 	if (pl->shader_program == 0) {
 		return fln_error(L, "invalid pipeline");
 	}
@@ -323,7 +327,7 @@ static int l_m_pipeline_uniform(lua_State *L) {
 
 			if (transform && *transform) {
 				// glms_mat4_print(*transform, stdout);
-				glUniformMatrix4fv(location, 1, GL_FALSE, (const GLfloat *)*transform);
+				glUniformMatrix4fv(location, 1, GL_FALSE, reinterpret_cast<GLfloat *>(*transform));
 			} else {
 				return fln_error(L, "invalid transform");
 			}
@@ -424,7 +428,7 @@ static int l_mesh(lua_State *L) {
 		offset += attributes[i] * sizeof(float);
 	}
 
-	gfx_mesh *mesh = lua_newuserdata(L, sizeof(gfx_mesh));
+	gfx_mesh *mesh = reinterpret_cast<gfx_mesh *>(lua_newuserdata(L, sizeof(gfx_mesh)));
 	luaL_setmetatable(L, FLN_USERTYPE_MESH);
 	mesh->vao = vao;
 	mesh->vbo = vbo;
@@ -435,7 +439,7 @@ static int l_mesh(lua_State *L) {
 }
 
 static int l_m_mesh_release(lua_State *L) {
-	gfx_mesh *mesh = luaL_checkudata(L, -1, FLN_USERTYPE_MESH);
+	gfx_mesh *mesh = reinterpret_cast<gfx_mesh *>(luaL_checkudata(L, -1, FLN_USERTYPE_MESH));
 	if (mesh->vertices_count == 0 || mesh->ebo == 0 || mesh->vao == 0 || mesh->vbo == 0) {
 		return 0;
 	}
@@ -450,7 +454,7 @@ static int l_m_mesh_release(lua_State *L) {
 }
 
 static int l_texture2d(lua_State *L) {
-	fln_image *image = luaL_checkudata(L, 1, FLN_USERTYPE_IMAGE);
+	fln_image *image = reinterpret_cast<fln_image *>(luaL_checkudata(L, 1, FLN_USERTYPE_IMAGE));
 	if (!image->data) {
 		return fln_error(L, "invalid image data");
 	}
@@ -491,7 +495,7 @@ static int l_texture2d(lua_State *L) {
 	glPixelStorei(GL_UNPACK_ALIGNMENT, 4);
 	glBindTexture(GL_TEXTURE_2D, 0);
 
-	gfx_texture2d *texture_data = lua_newuserdata(L, sizeof(gfx_texture2d));
+	gfx_texture2d *texture_data = reinterpret_cast<gfx_texture2d *>(lua_newuserdata(L, sizeof(gfx_texture2d)));
 	luaL_setmetatable(L, FLN_USERTYPE_TEXTURE2D);
 	texture_data->id = texture;
 	texture_data->width = image->width;
@@ -501,14 +505,14 @@ static int l_texture2d(lua_State *L) {
 }
 
 static int l_texture2d_size(lua_State *L) {
-	gfx_texture2d *texture = luaL_checkudata(L, 1, FLN_USERTYPE_TEXTURE2D);
+	gfx_texture2d *texture = reinterpret_cast<gfx_texture2d *>(luaL_checkudata(L, 1, FLN_USERTYPE_TEXTURE2D));
 	lua_pushinteger(L, texture->width);
 	lua_pushinteger(L, texture->height);
 	return 2;
 }
 
 static int l_texture2d_release(lua_State *L) {
-	gfx_texture2d *texture = luaL_checkudata(L, 1, FLN_USERTYPE_TEXTURE2D);
+	gfx_texture2d *texture = reinterpret_cast<gfx_texture2d *>(luaL_checkudata(L, 1, FLN_USERTYPE_TEXTURE2D));
 	if (texture->id) {
 		glDeleteTextures(1, &texture->id);
 		texture->id = 0;

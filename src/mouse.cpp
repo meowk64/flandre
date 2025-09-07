@@ -8,8 +8,10 @@
 #include "mouse.h"
 #include <SDL3/SDL_events.h>
 #include <SDL3/SDL_mouse.h>
+extern "C" {
 #include <lauxlib.h>
 #include <lua.h>
+}
 
 static float mouse_wheel_status = 0; //
 

@@ -1,6 +1,9 @@
 #include "callback.h"
+
+extern "C" {
 #include <lauxlib.h>
 #include <lua.h>
+}
 
 static int KEY_ITERATE_FUNC = 0x0d000721;
 static int KEY_DRAW_FUNC = 0x9961;

@@ -10,7 +10,10 @@
 #include <SDL3/SDL.h>
 #include <SDL3/SDL_events.h>
 #include <SDL3/SDL_video.h>
+
+extern "C" {
 #include <lua.h>
+}
 
 #include "appstate.h"
 #include "opengl/glad.h"

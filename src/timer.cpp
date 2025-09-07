@@ -6,9 +6,10 @@
 	it under the terms of the MIT License.  See `LICENSE` for more details
 */
 #include "timer.h"
-
+extern "C" {
 #include <lauxlib.h>
 #include <lua.h>
+}
 
 #include <SDL3/SDL_timer.h>
 

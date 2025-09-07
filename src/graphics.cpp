@@ -8,8 +8,10 @@
 #include "graphics.h"
 
 #include <SDL3/SDL_video.h>
+extern "C" {
 #include <lauxlib.h>
 #include <lua.h>
+}
 
 #include "gfx_backend_ogl.h"
 #include "gfx_interface.h"

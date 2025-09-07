@@ -6,15 +6,18 @@
 	it under the terms of the MIT License.  See `LICENSE` for more details
 */
 #include "flandre.h"
-#include "data.h"
 #include "callback.h"
+#include "data.h"
 #include "graphics.h"
 #include "keyboard.h"
 #include "math.h"
 #include "mouse.h"
 #include "system.h"
 #include "timer.h"
+
+extern "C" {
 #include <lua.h>
+}
 
 int fln_luaopen(lua_State *L) {
 	lua_settop(L, 0);
